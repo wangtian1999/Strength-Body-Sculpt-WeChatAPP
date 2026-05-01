@@ -1,0 +1,217 @@
+.radio-group {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.radio-label {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  border: 1rpx solid #333;
+  color: #888;
+}
+
+.radio-label.active {
+  border-color: #fff;
+  color: #fff;
+  background-color: #1a1a1a;
+}
+
+.radio-label radio {
+  display: none;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20rpx;
+}
+
+.result-card {
+  padding: 20rpx;
+  border-left: 10rpx solid #fff;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.right-actions {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.help-btn {
+  font-size: 22rpx;
+  padding: 10rpx 20rpx;
+  border: 1rpx solid #00ff00;
+  color: #00ff00;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* 帮助弹窗样式 */
+.help-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.help-modal.show {
+  display: flex;
+}
+
+.help-content {
+  width: 100%;
+  max-height: 85vh;
+  background: #0a0a0a;
+  border: 2rpx solid #333;
+  padding: 40rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.help-header {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 40rpx;
+  border-left: 8rpx solid #00ff00;
+  padding-left: 20rpx;
+  letter-spacing: 2rpx;
+}
+
+.help-scroll {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 40rpx;
+}
+
+.help-section {
+  margin-bottom: 30rpx;
+}
+
+.help-title {
+  font-size: 26rpx;
+  color: #00ff00;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.help-text {
+  font-size: 24rpx;
+  color: #bbb;
+  line-height: 1.8;
+  margin-bottom: 10rpx;
+}
+
+.highlight-text {
+  color: #fff;
+  font-weight: bold;
+}
+
+.mode-toggle {
+  font-size: 22rpx;
+  padding: 10rpx 20rpx;
+  border: 1rpx solid #444;
+  color: #888;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.mode-toggle.detail {
+  color: #00ff00;
+  border-color: #00ff00;
+}
+
+.range-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15rpx;
+  margin-bottom: 30rpx;
+}
+
+.range-item {
+  padding: 15rpx 25rpx;
+  border: 1rpx solid #333;
+  font-size: 24rpx;
+  color: #666;
+  background: #0a0a0a;
+}
+
+.range-item.active {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: bold;
+}
+
+.tip-inline {
+  font-size: 20rpx;
+  color: #666;
+  margin-left: 20rpx;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.ref-link {
+  font-size: 20rpx;
+  color: #00ff00;
+  text-decoration: underline;
+}
+
+.bf-ref-container {
+  display: none;
+  margin-top: 20rpx;
+  border-top: 1rpx solid #333;
+  padding-top: 20rpx;
+}
+
+.bf-ref-container.show {
+  display: block;
+}
+
+.bf-ref-img {
+  width: 100%;
+  border: 1rpx solid #444;
+}
+
+.result-card.highlight {
+  border-left-color: #00ff00;
+  grid-column: span 1;
+}
+
+.fat-input-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.fat-slider {
+  flex: 1;
+  margin: 0;
+}
+
+.tip {
+  font-size: 20rpx;
+  color: #666;
+  margin-top: 10rpx;
+  display: block;
+}

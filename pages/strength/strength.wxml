@@ -1,0 +1,59 @@
+<view class="container">
+  <view class="section-title">03 / 力量推算</view>
+  
+  <view class="card">
+    <text class="label">推算依据</text>
+    <view class="info-row">
+      <text>当前体重: {{bodyData.weight}}kg</text>
+      <text>瘦体重 (LBM): {{bodyData.lbm}}kg</text>
+    </view>
+    <view class="info-row">
+      <text>当前等级: <text class="level-tag {{strengthLevel.class}}">{{strengthLevel.label}}</text></text>
+      <text>Wilks 分数: {{wilksScore}}</text>
+    </view>
+    <view class="tip">基于 Wilks 系数及大众平均力量水平推算 1RM</view>
+  </view>
+
+  <view class="section-title">三大项 1RM 预估 (1次最大重量)</view>
+  
+  <view class="strength-grid">
+    <view class="card strength-card squat">
+      <text class="label">深蹲 (SQUAT)</text>
+      <view><text class="big-number">{{estimatedSBD.squat}}</text><text class="unit">kg</text></view>
+    </view>
+    
+    <view class="card strength-card bench">
+      <text class="label">卧推 (BENCH)</text>
+      <view><text class="big-number">{{estimatedSBD.bench}}</text><text class="unit">kg</text></view>
+    </view>
+    
+    <view class="card strength-card deadlift">
+      <text class="label">硬拉 (DEADLIFT)</text>
+      <view><text class="big-number">{{estimatedSBD.deadlift}}</text><text class="unit">kg</text></view>
+    </view>
+  </view>
+
+  <view class="section-title">三大项 5x5 起步重量修正 (实测建议)</view>
+  
+  <view class="card adjustment-card">
+    <view class="adj-row">
+      <text class="label">深蹲起步</text>
+      <slider min="20" max="200" step="2.5" value="{{startRange.squatMin}}" bindchange="onWeightAdj" data-key="squatMin" show-value activeColor="#4caf50" />
+    </view>
+    <view class="adj-row">
+      <text class="label">卧推起步</text>
+      <slider min="20" max="150" step="2.5" value="{{startRange.benchMin}}" bindchange="onWeightAdj" data-key="benchMin" show-value activeColor="#2196f3" />
+    </view>
+    <view class="adj-row">
+      <text class="label">硬拉起步</text>
+      <slider min="20" max="250" step="2.5" value="{{startRange.deadliftMin}}" bindchange="onWeightAdj" data-key="deadliftMin" show-value activeColor="#f44336" />
+    </view>
+    <view class="tip-highlight">
+      * 建议：新手请先用 20kg 空杆进行测试，动作标准且无痛后再加重。
+    </view>
+  </view>
+
+  <button class="btn-primary" bindtap="saveAndNext">
+    {{targetData.goal === 'muscle' ? '一键生成渐进增肌计划' : '一键生成高效减脂计划'}}
+  </button>
+</view>

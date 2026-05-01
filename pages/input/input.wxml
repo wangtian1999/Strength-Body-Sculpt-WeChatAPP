@@ -1,0 +1,177 @@
+<view class="container">
+  <view class="header-row">
+    <view class="section-title">01 / 身材录入</view>
+    <view class="right-actions">
+      <view class="help-btn" bindtap="showHelp">使用说明</view>
+      <view class="mode-toggle {{isSimpleMode ? 'simple' : 'detail'}}" bindtap="toggleMode">
+        {{isSimpleMode ? '极简版' : '精细版'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 全局说明弹窗 -->
+  <view class="help-modal {{showHelpModal ? 'show' : ''}}" bindtap="hideHelp">
+    <view class="help-content" catchtap="stopBubble">
+      <view class="help-header">健力塑身 / 使用指南</view>
+      <scroll-view scroll-y class="help-scroll">
+        <view class="help-section">
+          <view class="help-title">1. 针对人群</view>
+          <view class="help-text">专门为 <text class="highlight-text">0-2 年健身初学者</text> 打造。如果你正处于“不知道该怎么练可以获得一个好身材”、“不知道该练多重”的迷茫期，这就是为你准备的。</view>
+        </view>
+
+        <view class="help-section">
+          <view class="help-title">2. 这是一个什么工具？</view>
+          <view class="help-text">这是一个简单的训练规划工具，帮助你获得更好的身材，更优秀的运动表现、绝对力量。</view>
+        </view>
+
+        <view class="help-section">
+          <view class="help-title">3. 解决了什么问题？</view>
+          <view class="help-text">• <text class="highlight-text">拒绝盲目负荷：</text>系统通过算法告诉你，你的第一组该放多少杠铃片，避免受伤或练轻了浪费时间。</view>
+          <view class="help-text">• <text class="highlight-text">拒绝随缘进步：</text>自动生成 12 周线性渐进计划，明确每一次训练的加重指标。</view>
+          <view class="help-text">• <text class="highlight-text">拒绝无效塑形：</text>通过[力量增长]驱动[肌肉生长]。按计划执行，能确保你在体脂下降或维持的同时，骨架肌肉量得到真实提升，获得更硬核的视觉身材。</view>
+        </view>
+
+        <view class="help-section">
+          <view class="help-title">4. 如何使用？</view>
+          <view class="help-text">只需四步：[身材录入] → [目标规划] → [力量推算] → [计划生成]。完成后，带上生成的计划去健身房执行即可。</view>
+        </view>
+
+        <view class="help-section">
+          <view class="help-title">5. 为什么先录入身材数据？</view>
+          <view class="help-text">身材数据（BMI、体脂、瘦体重）是所有健身算法的<text class="highlight-text">“数字底座”</text>。只有先定下你的基准身形，系统才能精准推算出你的代谢缺口和力量潜力。</view>
+        </view>
+
+        <view class="help-section">
+          <view class="help-title">6. 为什么要推算“三大项”数据？</view>
+          <view class="help-text">深蹲、卧推、硬拉被称为“三大项”，是衡量基础力量的黄金标准。它们能动员全身最多的肌肉群，练好这三个，增肌效率远超各种花哨的器械。</view>
+        </view>
+
+        <view class="help-section">
+          <view class="help-title">7. 计划里的动作是怎么定的？</view>
+          <view class="help-text">基于经典的 <text class="highlight-text">L.P.P. (线性渐进)</text> 逻辑，精选了深蹲、硬拉、卧推、推举、划船等复合动作。它们是所有高级训练的基石，能强制身体进入持续增长的轨道。</view>
+        </view>
+      </scroll-view>
+      <button class="btn-primary" bindtap="hideHelp">开启硬核之旅</button>
+    </view>
+  </view>
+  
+  <view class="card">
+    <text class="label">性别</text>
+    <radio-group bindchange="onGenderChange" class="radio-group">
+      <label class="radio-label {{gender === 'male' ? 'active' : ''}}">
+        <radio value="male" checked="{{gender === 'male'}}" /> 男
+      </label>
+      <label class="radio-label {{gender === 'female' ? 'active' : ''}}">
+        <radio value="female" checked="{{gender === 'female'}}" /> 女
+      </label>
+    </radio-group>
+
+    <!-- 极简版范围选择 -->
+    <block wx:if="{{isSimpleMode}}">
+      <text class="label">年龄阶段</text>
+      <view class="range-selector">
+        <view wx:for="{{ranges.age}}" wx:key="label" 
+              class="range-item {{selectedIndices.age === index ? 'active' : ''}}" 
+              bindtap="selectRange" data-type="age" data-index="{{index}}">
+          {{item.label}}
+        </view>
+      </view>
+
+      <text class="label">身高范围</text>
+      <view class="range-selector">
+        <view wx:for="{{ranges.height}}" wx:key="label" 
+              class="range-item {{selectedIndices.height === index ? 'active' : ''}}" 
+              bindtap="selectRange" data-type="height" data-index="{{index}}">
+          {{item.label}}
+        </view>
+      </view>
+
+      <text class="label">体重区间</text>
+      <view class="range-selector">
+        <view wx:for="{{ranges.weight}}" wx:key="label" 
+              class="range-item {{selectedIndices.weight === index ? 'active' : ''}}" 
+              bindtap="selectRange" data-type="weight" data-index="{{index}}">
+          {{item.label}}
+        </view>
+      </view>
+
+      <view class="label-row">
+        <text class="label">身材视觉感 (体脂)</text>
+        <text class="ref-link" bindtap="toggleBFRef">查看参考图</text>
+      </view>
+      <view class="range-selector">
+        <view wx:for="{{ranges.fat}}" wx:key="label" 
+              class="range-item {{selectedIndices.fat === index ? 'active' : ''}}" 
+              bindtap="selectRange" data-type="fat" data-index="{{index}}">
+          {{item.label}}
+        </view>
+      </view>
+
+      <!-- 体脂参考图容器 (极简版) -->
+      <view class="bf-ref-container {{showBFRef ? 'show' : ''}}" wx:if="{{gender}}">
+        <image mode="widthFix" class="bf-ref-img" src="/images/bf_{{gender}}.jpg" bindtap="previewBFImage" />
+        <view class="tip-row" bindtap="toggleBFRef">
+          <text class="tip">点击图片查看大图 (可缩放)</text>
+          <text class="close-txt">收起</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 精细版手动录入 -->
+    <block wx:else>
+      <text class="label">年龄 (Years)</text>
+      <input type="number" placeholder="输入年龄" value="{{age}}" bindinput="onAgeInput" />
+
+      <text class="label">身高 (CM)</text>
+      <input type="number" placeholder="输入身高" value="{{height}}" bindinput="onHeightInput" />
+
+      <text class="label">当前体重 (KG)</text>
+      <input type="digit" placeholder="输入体重" value="{{weight}}" bindinput="onWeightInput" />
+
+      <view class="label-row">
+        <text class="label">体脂率 (BF%)</text>
+        <text class="ref-link" bindtap="toggleBFRef">查看参考图</text>
+      </view>
+      <input type="digit" placeholder="输入体脂率" value="{{bodyFat}}" bindinput="onFatInput" />
+      <text class="tip">根据 BMI 自动估算，可手动修正</text>
+
+      <!-- 体脂参考图容器 -->
+      <view class="bf-ref-container {{showBFRef ? 'show' : ''}}" wx:if="{{gender}}">
+        <image mode="widthFix" class="bf-ref-img" src="/images/bf_{{gender}}.jpg" bindtap="previewBFImage" />
+        <view class="tip-row" bindtap="toggleBFRef">
+          <text class="tip">点击图片查看大图 (可缩放)</text>
+          <text class="close-txt">收起</text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="section-title">计算结果</view>
+  
+  <view class="result-grid">
+    <view class="card result-card">
+      <text class="label">BMI</text>
+      <view><text class="big-number">{{bmi}}</text></view>
+    </view>
+    <view class="card result-card">
+      <text class="label">BMR (基础代谢)</text>
+      <view><text class="big-number">{{bmr}}</text><text class="unit">kcal</text></view>
+    </view>
+    <view class="card result-card">
+      <text class="label">TDEE (每日消耗)</text>
+      <view><text class="big-number">{{tdee}}</text><text class="unit">kcal</text></view>
+    </view>
+    <view class="card result-card highlight">
+      <text class="label">最终计算体脂率</text>
+      <view class="fat-input-row">
+        <text class="big-number">{{bodyFat}}</text><text class="unit">%</text>
+      </view>
+      <text class="label" style="margin-top:20rpx">瘦体重 (LBM)</text>
+      <view class="fat-input-row">
+        <text class="big-number">{{lbm}}</text><text class="unit">kg</text>
+      </view>
+    </view>
+  </view>
+
+  <button class="btn-primary" bindtap="saveAndNext">保存数据，规划目标</button>
+</view>

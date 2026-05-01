@@ -1,0 +1,121 @@
+<view class="container">
+  <view class="section-title">04 / {{targetData.goal === 'muscle' ? '线性渐进超负荷计划' : '高效减脂训练计划'}}</view>
+  
+  <view class="card plan-summary">
+    <view class="summary-item">
+      <text class="label">周期</text>
+      <text class="value">{{targetData.estimatedWeeks}} 周 ({{targetData.goal === 'muscle' ? 'L.P.P.' : '脂肪燃烧' }})</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">{{targetData.goal === 'muscle' ? '每周加重建议' : '训练强度建议'}}</text>
+      <text class="value">{{targetData.goal === 'muscle' ? 'S/D: 2.5kg | B: 1.25kg' : '保持力量，控制心率'}}</text>
+    </view>
+  </view>
+
+  <!-- 2.0 新增：力量增长预测 -->
+  <view class="card growth-card" wx:if="{{targetData.trainingMode === 'gym_strength' && growthPrediction}}">
+    <view class="growth-header">
+      <text class="label">2.0 / 力量增长预测 (三大项总和)</text>
+      <text class="growth-diff">+{{growthPrediction.diff}}kg</text>
+    </view>
+    <view class="growth-chart-sim">
+      <view class="chart-point">
+        <text class="chart-val">{{growthPrediction.start}}kg</text>
+        <text class="chart-label">W1 起步</text>
+      </view>
+      <view class="chart-line"></view>
+      <view class="chart-point">
+        <text class="chart-val highlight">{{growthPrediction.end}}kg</text>
+        <text class="chart-label">W{{targetData.estimatedWeeks}} 目标</text>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view scroll-x class="week-selector">
+    <view 
+      wx:for="{{targetData.estimatedWeeks || 12}}" 
+      wx:key="*this" 
+      class="week-tab {{currentWeek === index + 1 ? 'active' : ''}}"
+      bindtap="selectWeek"
+      data-week="{{index + 1}}"
+    >
+      W{{index + 1}}
+    </view>
+  </scroll-view>
+
+  <view class="section-title">WEEK {{currentWeek}} 训练详情</view>
+
+  <view class="day-card" wx:for="{{weeklyPlan}}" wx:key="day">
+    <view class="day-header">{{item.day}}</view>
+    <view class="exercise-row {{completedTasks[ex.id] ? 'completed' : ''}}" wx:for="{{item.exercises}}" wx:for-item="ex" wx:key="id">
+      <view class="checkbox {{completedTasks[ex.id] ? 'checked' : ''}}" bindtap="toggleTask" data-id="{{ex.id}}"></view>
+      <view class="ex-info">
+        <view class="ex-name-row">
+          <text class="ex-name">{{ex.name}}</text>
+          <text class="swap-btn" wx:if="{{ex.canSwap}}" bindtap="swapExercise" data-id="{{ex.id}}" data-current="{{ex.original}}">🔄 替换</text>
+        </view>
+        <view class="ex-meta">
+          <text class="ex-rest">Rest: {{ex.rest}}</text>
+          <text class="warmup-badge" wx:if="{{ex.warmUp}}">含热身</text>
+        </view>
+        <text class="ex-note" wx:if="{{ex.note}}">{{ex.note}}</text>
+      </view>
+      <view class="ex-data">
+        <text class="ex-sets">{{ex.sets}} x {{ex.reps}}</text>
+        <text class="ex-weight">{{ex.weight}} {{ex.weight === '自重' ? '' : 'kg'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 2.0 新增：硬核补给指南 -->
+  <block wx:if="{{foodExchange}}">
+    <view class="section-title">2.0 / 硬核补给指南 (换算参考)</view>
+    <view class="card nutrition-card">
+      <view class="macro-summary">
+        <view class="macro-item"><text class="p-dot"></text>蛋白质 {{targetData.macros.protein}}g</view>
+        <view class="macro-item"><text class="c-dot"></text>碳水 {{targetData.macros.carb}}g</view>
+      </view>
+      <view class="food-grid">
+        <view class="food-col">
+          <text class="food-title">优质蛋白建议</text>
+          <view wx:for="{{foodExchange.proteinFood}}" wx:key="name" class="food-item">
+            <text>{{item.name}}</text>
+            <text class="food-amount">{{item.amount}}{{item.unit}}</text>
+          </view>
+        </view>
+        <view class="food-col">
+          <text class="food-title">优质碳水建议</text>
+          <view wx:for="{{foodExchange.carbFood}}" wx:key="name" class="food-item">
+            <text>{{item.name}}</text>
+            <text class="food-amount">{{item.amount}}{{item.unit}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="tip-highlight">注意：以上为全天总量换算，建议分 3-4 餐摄入。</view>
+    </view>
+  </block>
+
+  <view class="safety-box">
+    <text class="safety-title">⚠️ 安全与质量提醒</text>
+    <text>• 动作质量第一：若动作变形，请立即停止加重，保持当前重量直至标准。</text>
+    <text wx:if="{{targetData.trainingMode === 'gym_strength'}}">• 热身组建议：正式组前用空杆x10, 50%x8, 80%x3 进行充分热身。</text>
+    <text>• 疲劳管理：若连续两次无法完成目标组次数，建议下周重量下调 10%（减载周）。</text>
+  </view>
+
+  <view class="tip-box" wx:if="{{targetData.goal === 'muscle'}}">
+    <text>• 线性渐进核心：每次训练完成目标后，下次同动作加重</text>
+    <text>• 若无法完成组次数，下次训练重量保持不变（平台期）</text>
+    <text>• 建议每周训练 3-4 次，交叉安排 S/B/D</text>
+  </view>
+
+  <view class="tip-box" wx:else>
+    <text>• 减脂核心：在热量缺口下，保持力量训练以防止肌肉流失</text>
+    <text>• 不要盲目冲极限，重点在于完成动作质量和控制组间歇</text>
+    <text>• 建议配合有氧训练，并严格遵守算法推荐的每日热量摄入</text>
+  </view>
+
+  <view class="footer-actions">
+    <button class="btn-outline" bindtap="goToStrength">调整力量数据</button>
+    <button class="btn-secondary" bindtap="resetAll">清空所有重置</button>
+  </view>
+</view>

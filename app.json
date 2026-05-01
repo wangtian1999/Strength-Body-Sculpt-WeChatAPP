@@ -1,0 +1,42 @@
+{
+  "pages": [
+    "pages/input/input",
+    "pages/target/target",
+    "pages/strength/strength",
+    "pages/plan/plan"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#000000",
+    "navigationBarTitleText": "健力塑身",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#000000"
+  },
+  "tabBar": {
+    "color": "#888888",
+    "selectedColor": "#ffffff",
+    "backgroundColor": "#000000",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/input/input",
+        "text": "录入"
+      },
+      {
+        "pagePath": "pages/target/target",
+        "text": "规划"
+      },
+      {
+        "pagePath": "pages/strength/strength",
+        "text": "推算"
+      },
+      {
+        "pagePath": "pages/plan/plan",
+        "text": "计划"
+      }
+    ]
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}
