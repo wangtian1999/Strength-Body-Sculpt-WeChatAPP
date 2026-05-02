@@ -1,0 +1,77 @@
+.profile-card-ios {
+  padding: 16px;
+}
+
+.profile-header-ios {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-placeholder-ios {
+  width: 60px;
+  height: 60px;
+  background: var(--ios-light-gray);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-right: 16px;
+}
+
+.profile-info-ios {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-name-ios {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.profile-status-ios {
+  font-size: 13px;
+  color: var(--ios-text-gray);
+  margin-top: 4px;
+}
+
+.sbd-card-ios {
+  padding: 16px;
+}
+
+.sbd-row-ios {
+  display: flex;
+  justify-content: space-around;
+}
+
+.sbd-col-ios {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sbd-lab-ios {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  margin-bottom: 4px;
+}
+
+.sbd-val-ios {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.ios-arrow {
+  color: #3c3c43;
+  font-size: 17px;
+  opacity: 0.3;
+}
+
+/* 移除冗余的 Modal 样式，已移至 app.wxss */
+.ios-footer-tip {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ios-text-gray);
+  margin: 40px 0;
+}

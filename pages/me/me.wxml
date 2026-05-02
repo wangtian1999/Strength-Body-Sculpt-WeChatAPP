@@ -1,0 +1,103 @@
+<view class="container">
+  <view class="large-title">我的</view>
+
+  <!-- 用户概览 Apple Health Style -->
+  <view class="ios-group profile-card-ios">
+    <view class="profile-header-ios">
+      <view class="avatar-placeholder-ios">{{bodyData.gender === 'male' ? 'M' : 'F'}}</view>
+      <view class="profile-info-ios">
+        <text class="profile-name-ios">{{bodyData.age}} 岁 · {{bodyData.height}}cm</text>
+        <text class="profile-status-ios">当前状态: {{strengthLevel.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 身体数据卡片 -->
+  <view class="section-header">身体数据 (BODY DATA)</view>
+  <view class="ios-group">
+    <view class="ios-item">
+      <text>体重</text>
+      <text class="ios-value-highlight">{{bodyData.weight}} kg</text>
+    </view>
+    <view class="ios-item">
+      <text>BMI</text>
+      <text class="ios-value-highlight">{{bodyData.bmi}}</text>
+    </view>
+    <view class="ios-item">
+      <text>体脂率</text>
+      <text class="ios-value-highlight">{{bodyData.bodyFat}}%</text>
+    </view>
+    <view class="ios-item">
+      <text>TDEE</text>
+      <text class="ios-value-highlight">{{bodyData.tdee}} kcal</text>
+    </view>
+  </view>
+
+  <!-- 力量记录 -->
+  <view class="section-header">力量基准 (INITIAL SBD)</view>
+  <view class="ios-group sbd-card-ios">
+    <view class="sbd-row-ios">
+      <view class="sbd-col-ios">
+        <text class="sbd-lab-ios">深蹲</text>
+        <text class="sbd-val-ios">{{strengthData.startRange.squatMin}}kg</text>
+      </view>
+      <view class="sbd-col-ios">
+        <text class="sbd-lab-ios">卧推</text>
+        <text class="sbd-val-ios">{{strengthData.startRange.benchMin}}kg</text>
+      </view>
+      <view class="sbd-col-ios">
+        <text class="sbd-lab-ios">硬拉</text>
+        <text class="sbd-val-ios">{{strengthData.startRange.deadliftMin}}kg</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 系统设置 -->
+  <view class="section-header">账户与系统</view>
+  <view class="ios-group">
+    <view class="ios-item haptic-active" bindtap="showHelp">
+      <text>使用指南与原理</text>
+      <text class="ios-arrow">></text>
+    </view>
+    <view class="ios-item haptic-active" bindtap="reOnboarding">
+      <text>重新录入数据</text>
+      <text class="ios-arrow">></text>
+    </view>
+    <view class="ios-item haptic-active" bindtap="reTargeting">
+      <text>修改训练目标</text>
+      <text class="ios-arrow">></text>
+    </view>
+    <view class="ios-item haptic-active" bindtap="resetSystem">
+      <text style="color: var(--ios-red)">彻底重置系统</text>
+    </view>
+  </view>
+
+  <view class="ios-footer-tip">
+    健力塑身 v1.0 · 数字健身，量化进化
+  </view>
+
+  <!-- 使用说明 Modal (通用) -->
+  <view class="ios-modal" wx:if="{{showHelpModal}}" bindtap="hideHelp">
+    <view class="modal-content help-content-ios" catchtap="stopBubble">
+      <scroll-view scroll-y="true" class="help-scroll-ios">
+        <view class="help-section">
+          <view class="help-title">Who · 针对人群</view>
+          <view class="help-text">本工具专为 0-2 年健身初学者设计，解决“不知道练什么”、“不知道练多重”和“如何进阶”的核心痛点。</view>
+        </view>
+        <view class="help-section">
+          <view class="help-title">What · 它是做什么的</view>
+          <view class="help-text">基于“数字健身”理念，通过身材推算力量基准，并生成 SBD（深蹲/卧推/硬拉）渐进超负荷计划，让肌肉增长量化可见。</view>
+        </view>
+        <view class="help-section">
+          <view class="help-title">How · 如何使用</view>
+          <view class="help-text">1. 录入身体数据；\n2. 设定增肌或减脂目标；\n3. 获取推算力量并进行微调；\n4. 开启 12 周训练计划并按周执行。</view>
+        </view>
+        <view class="help-section">
+          <view class="help-title">Why · 为什么是三大项</view>
+          <view class="help-text">力量驱动型塑形：力量的提升是肌肉增长最稳定的驱动力。SBD 是人体多关节复合动作的基石，效率最高。</view>
+        </view>
+      </scroll-view>
+      <view class="modal-close" bindtap="hideHelp">了解并开始</view>
+    </view>
+  </view>
+</view>

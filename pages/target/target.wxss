@@ -1,228 +1,90 @@
-.radio-group {
-  display: flex;
-  gap: 15rpx;
-  margin-bottom: 30rpx;
+/** target.wxss - Apple Style Purged **/
+.ios-item-vertical {
+  padding: 16px;
+  border-bottom: 0.5px solid var(--ios-light-gray);
 }
 
-.radio-group.scroll-x {
-  overflow-x: auto;
-  flex-wrap: nowrap;
-}
-
-.radio-group.scroll-x::-webkit-scrollbar {
-  display: none;
-}
-
-.radio-label {
-  flex: 1;
-  flex-shrink: 0;
-  text-align: center;
-  padding: 15rpx 10rpx;
-  border: 1rpx solid #333;
-  color: #888;
-  font-size: 24rpx;
-  white-space: nowrap;
-}
-
-.radio-label.active {
-  border-color: #fff;
-  color: #fff;
-  background-color: #1a1a1a;
-}
-
-.tip-row {
+.label-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10rpx;
+  margin-bottom: 12px;
 }
 
-.close-txt {
-  font-size: 22rpx;
-  color: #00ff00;
-  text-decoration: underline;
-  padding: 10rpx;
+.label {
+  font-size: 15px;
+  color: var(--ios-text-gray);
 }
 
-.radio-label radio {
-  display: none;
+.link-apple {
+  color: var(--ios-blue);
+  font-size: 13px;
 }
 
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
-
-.mode-toggle {
-  font-size: 22rpx;
-  padding: 10rpx 20rpx;
-  border: 1rpx solid #444;
-  color: #888;
-  font-family: 'Courier New', Courier, monospace;
-}
-
-.mode-toggle.detail {
-  color: #00ff00;
-  border-color: #00ff00;
-}
-
-.target-options {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-  margin-bottom: 30rpx;
-}
-
-.target-option-item {
-  padding: 25rpx;
-  border: 1rpx solid #333;
-  background: #0a0a0a;
-}
-
-.target-option-item.active {
-  border-color: #ffffff;
-  background: #1a1a1a;
-}
-
-.option-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 5rpx;
-}
-
-.option-label {
-  font-size: 30rpx;
-  font-weight: bold;
-  color: #fff;
-}
-
-.option-fat-tag {
-  font-size: 24rpx;
-  font-family: 'Courier New', Courier, monospace;
-  color: #888;
-  font-weight: bold;
-}
-
-.target-option-item.active .option-fat-tag {
-  color: #00ff00;
-}
-
-.target-option-item.active .option-label {
-  color: #00ff00;
-}
-
-.option-desc {
-  font-size: 22rpx;
-  color: #666;
-}
-
-.ref-link-target {
-  font-size: 20rpx;
-  color: #00ff00;
-  text-decoration: underline;
-  margin-top: 10rpx;
-  display: block;
-}
-
-.bf-ref-container {
-  display: none;
-  margin-top: 20rpx;
-  border-top: 1rpx solid #333;
-  padding-top: 20rpx;
-}
-
-.bf-ref-container.show {
-  display: block;
-}
-
-.bf-ref-img {
-  width: 100%;
-  border: 1rpx solid #444;
-}
-
-.fat-input-row {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  margin-bottom: 20rpx;
-}
-
-.fat-slider {
-  flex: 1;
+.ios-slider {
   margin: 0;
+  padding: 8px 0;
 }
 
-.fat-value {
-  font-size: 32rpx;
-  font-weight: bold;
-  width: 100rpx;
-  text-align: right;
-  font-family: 'Courier New', Courier, monospace;
+.ios-value-highlight {
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
 }
 
-.picker-box {
-  background: #111;
-  border: 1rpx solid #333;
-  color: white;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
-  text-align: center;
+.nutrition-card-ios {
+  padding: 24px;
 }
 
-.result-card.full-width {
-  grid-column: span 2;
-  border-left: none;
-  border-bottom: 4rpx solid #fff;
-}
-
-.result-card.full-width.muscle {
-  border-bottom-color: #4caf50;
-}
-
-.result-card.full-width.fat {
-  border-bottom-color: #ff9800;
-}
-
-.macro-grid {
+.calories-header-ios {
   display: flex;
-  justify-content: space-around;
-  margin-top: 20rpx;
-  padding: 10rpx 0;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
-.macro-item {
+.cal-val {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.cal-unit {
+  font-size: 13px;
+  color: var(--ios-text-gray);
+  margin-left: 4px;
+}
+
+.macro-grid-ios {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.macro-item-ios {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-bottom: 8px;
+}
+
+.dot.protein { background: #fff; }
+.dot.carb { background: var(--ios-green); }
+.dot.fat { background: #ff9500; }
+
+.m-lab {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  margin-bottom: 4px;
 }
 
 .m-val {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #fff;
-  font-family: 'Courier New', Courier, monospace;
-}
-
-.m-lab {
-  font-size: 20rpx;
-  color: #888;
-  margin-top: 5rpx;
-}
-
-.result-card.muscle {
-  border-left-color: #4caf50;
-}
-
-.result-card.fat {
-  border-left-color: #ff9800;
-}
-
-.tip {
-  font-size: 20rpx;
-  color: #888;
-  display: block;
-  margin-top: 10rpx;
+  font-size: 15px;
+  font-weight: 600;
 }

@@ -1,124 +1,76 @@
 <view class="container">
-  <view class="header-row">
-    <view class="section-title">02 / 目标规划</view>
-    <view class="mode-toggle {{isSimpleMode ? 'simple' : 'detail'}}" bindtap="toggleMode">
-      {{isSimpleMode ? '极简版' : '精细版'}}
-    </view>
-  </view>
-  
-  <view class="card">
-    <text class="label">期望方向</text>
-    <radio-group bindchange="onGoalChange" class="radio-group">
-      <label class="radio-label {{goal === 'muscle' ? 'active' : ''}}">
-        <radio value="muscle" checked="{{goal === 'muscle'}}" /> 增肌
-      </label>
-      <label class="radio-label {{goal === 'fat_loss' ? 'active' : ''}}">
-        <radio value="fat_loss" checked="{{goal === 'fat_loss'}}" /> 减脂
-      </label>
-    </radio-group>
+  <view class="large-title">规划您的目标</view>
 
-    <text class="label">训练模式</text>
-    <radio-group bindchange="onModeChange" class="radio-group scroll-x">
-      <label class="radio-label {{trainingMode === 'gym_strength' ? 'active' : ''}}">
-        <radio value="gym_strength" checked="{{trainingMode === 'gym_strength'}}" /> 健身房三大项
-      </label>
-      <label class="radio-label {{trainingMode === 'home_bodyweight' ? 'active' : ''}}">
-        <radio value="home_bodyweight" checked="{{trainingMode === 'home_bodyweight'}}" /> 居家/囚徒训练
-      </label>
-      <label class="radio-label {{trainingMode === 'cardio' ? 'active' : ''}}">
-        <radio value="cardio" checked="{{trainingMode === 'cardio'}}" /> 纯有氧/心肺
-      </label>
-    </radio-group>
-
-    <!-- 极简版目标选择 -->
-    <block wx:if="{{isSimpleMode}}">
-      <text class="label">选择你的理想身形</text>
-      <view class="target-options">
-        <view wx:for="{{targetOptions[goal]}}" wx:key="label" 
-              class="target-option-item {{selectedTargetIndex === index ? 'active' : ''}}"
-              bindtap="selectTargetOption" data-index="{{index}}">
-          <view class="option-header">
-            <view class="option-label">{{item.label}}</view>
-            <view class="option-fat-tag">{{item.fat + (bodyData.gender === 'female' ? 7 : 0)}}% BF</view>
-          </view>
-          <view class="option-desc">{{item.desc}}</view>
-        </view>
-      </view>
-      <text class="ref-link-target" bindtap="toggleBFRef">查看目标体脂参考图</text>
-
-      <!-- 体脂参考图容器 -->
-      <view class="bf-ref-container {{showBFRef ? 'show' : ''}}" bindtap="toggleBFRef" wx:if="{{bodyData && bodyData.gender}}">
-        <image mode="widthFix" class="bf-ref-img" src="/images/bf_{{bodyData.gender}}.jpg" />
-        <text class="tip">提示：点击图片可关闭</text>
-      </view>
-    </block>
-
-    <!-- 精细版手动规划 -->
-    <block wx:else>
-      <text class="label">目标体重 (KG)</text>
-      <input type="digit" placeholder="输入目标体重" value="{{targetWeight}}" bindinput="onTargetWeightInput" />
-
-      <text class="label">期望体脂率 (%)</text>
-      <view class="fat-input-row">
-        <slider class="fat-slider" min="5" max="35" step="1" value="{{targetBodyFat}}" bindchange="onTargetFatChange" activeColor="#ffffff" backgroundColor="#333333" />
-        <text class="fat-value">{{targetBodyFat}}%</text>
-      </view>
-      <text class="ref-link-target" bindtap="toggleBFRef">查看体脂参考图</text>
-
-      <!-- 体脂参考图容器 -->
-      <view class="bf-ref-container {{showBFRef ? 'show' : ''}}" bindtap="toggleBFRef" wx:if="{{bodyData && bodyData.gender}}">
-        <image mode="widthFix" class="bf-ref-img" src="/images/bf_{{bodyData.gender}}.jpg" />
-        <text class="tip">提示：点击图片可关闭</text>
-      </view>
-    </block>
-
-    <text class="label">训练基础</text>
-    <picker bindchange="onLevelChange" value="{{levelIndex}}" range="{{levels}}">
-      <view class="picker-box">
-        {{levels[levelIndex]}}
-      </view>
-    </picker>
+  <!-- 目标方向 Segmented Control -->
+  <view class="section-header">期望方向</view>
+  <view class="segmented-control">
+    <view class="segmented-item {{goal === 'muscle' ? 'active' : ''}}" bindtap="selectGoal" data-goal="muscle">增肌塑形</view>
+    <view class="segmented-item {{goal === 'fat_loss' ? 'active' : ''}}" bindtap="selectGoal" data-goal="fat_loss">减脂瘦身</view>
   </view>
 
-  <view class="section-title">算法推算</view>
-  
-  <view class="result-grid">
-    <view class="card result-card {{goal === 'muscle' ? 'muscle' : 'fat'}} full-width">
-      <text class="label">每日宏量元素建议</text>
-      <view class="macro-grid">
-        <view class="macro-item">
-          <text class="m-val">{{macros.protein}}g</text>
-          <text class="m-lab">蛋白质</text>
-        </view>
-        <view class="macro-item">
-          <text class="m-val">{{macros.carb}}g</text>
-          <text class="m-lab">碳水</text>
-        </view>
-        <view class="macro-item">
-          <text class="m-val">{{macros.fat}}g</text>
-          <text class="m-lab">脂肪</text>
-        </view>
+  <!-- 训练环境 Segmented Control -->
+  <view class="section-header">训练环境</view>
+  <view class="segmented-control">
+    <view class="segmented-item {{trainingMode === 'gym_strength' ? 'active' : ''}}" bindtap="selectMode" data-mode="gym_strength">健身房</view>
+    <view class="segmented-item {{trainingMode === 'home_bodyweight' ? 'active' : ''}}" bindtap="selectMode" data-mode="home_bodyweight">居家/自重</view>
+    <view class="segmented-item {{trainingMode === 'cardio' ? 'active' : ''}}" bindtap="selectMode" data-mode="cardio">有氧/HIIT</view>
+  </view>
+
+  <!-- 目标详情 -->
+  <view class="section-header">目标设定</view>
+  <view class="ios-group">
+    <view class="ios-item-vertical">
+      <view class="label-row">
+        <text class="label">目标体脂率: {{targetBodyFat}}%</text>
+        <text class="link-apple" bindtap="toggleBFRef">参考图</text>
       </view>
+      <slider class="ios-slider" min="{{goal === 'muscle' ? 8 : 5}}" max="{{goal === 'muscle' ? 20 : 35}}" step="1" value="{{targetBodyFat}}" bindchange="onFatChange" activeColor="#fff" />
     </view>
     
-    <view class="card result-card {{goal === 'muscle' ? 'muscle' : 'fat'}}">
-      <text class="label">目标体重 (预估)</text>
-      <view><text class="big-number">{{targetWeight}}</text><text class="unit">kg</text></view>
-      <text class="tip">目标体脂: {{targetBodyFat}}%</text>
+    <view class="ios-item">
+      <text>预估目标体重</text>
+      <text class="ios-value-highlight">{{targetWeight}}kg</text>
     </view>
 
-    <view class="card result-card {{goal === 'muscle' ? 'muscle' : 'fat'}}">
-      <text class="label">建议每日摄入</text>
-      <view><text class="big-number">{{dailyCalories}}</text><text class="unit">kcal</text></view>
-      <text class="tip">{{goal === 'muscle' ? '热量盈余' : '热量缺口'}}: {{calorieOffset}} kcal</text>
-    </view>
-    
-    <view class="card result-card">
-      <text class="label">预计达成时间</text>
-      <view><text class="big-number">{{estimatedDays}}</text><text class="unit">Days</text></view>
-      <text class="tip">约为 {{estimatedWeeks}} 周</text>
+    <view class="ios-item">
+      <text>预估达成周期</text>
+      <text class="ios-value-highlight">{{estimatedWeeks}}周</text>
     </view>
   </view>
 
-  <button class="btn-primary" bindtap="saveAndNext">确认目标，推算力量</button>
+  <!-- 营养建议卡片 -->
+  <view class="section-header">营养配比建议</view>
+  <view class="ios-group nutrition-card-ios">
+    <view class="calories-header-ios">
+      <text class="cal-val">{{dailyCalories}}</text>
+      <text class="cal-unit">kcal / 日</text>
+    </view>
+    <view class="macro-grid-ios">
+      <view class="macro-item-ios">
+        <view class="dot protein"></view>
+        <text class="m-lab">蛋白质</text>
+        <text class="m-val">{{macros.protein}}g</text>
+      </view>
+      <view class="macro-item-ios">
+        <view class="dot carb"></view>
+        <text class="m-lab">碳水</text>
+        <text class="m-val">{{macros.carb}}g</text>
+      </view>
+      <view class="macro-item-ios">
+        <view class="dot fat"></view>
+        <text class="m-lab">脂肪</text>
+        <text class="m-val">{{macros.fat}}g</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="btn-apple haptic-active" bindtap="saveAndNext">一键生成训练计划</view>
+
+  <!-- 参考图 Modal -->
+  <view class="ios-modal" wx:if="{{showBFRef}}" bindtap="toggleBFRef">
+    <view class="modal-content" catchtap="stopBubble">
+      <image class="bf-image" src="/images/bf_{{bodyData.gender}}.jpg" mode="widthFix" bindtap="previewRefImage" />
+      <view class="modal-close" bindtap="toggleBFRef">完成</view>
+    </view>
+  </view>
 </view>

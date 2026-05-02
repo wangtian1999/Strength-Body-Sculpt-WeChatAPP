@@ -5,8 +5,6 @@ Page({
     trainingMode: 'gym_strength', // 默认健身房三大项
     targetWeight: 75,
     targetBodyFat: 15,
-    levelIndex: 0,
-    levels: ['新手 (0-6个月)', '初级 (6-12个月)', '中级 (1-2年)', '高级 (2年以上)'],
     dailyCalories: 0,
     estimatedDays: 0,
     estimatedWeeks: 0,
@@ -33,14 +31,23 @@ Page({
 
   onShow() {
     const bodyData = wx.getStorageSync('bodyData');
+    const existingTargetData = wx.getStorageSync('targetData');
+
     if (bodyData) {
-      // 继承录入页的模式设定
+      // 如果本地已有 targetData，优先读取已保存的数据，避免重复重置
+      if (existingTargetData) {
+        this.setData({
+          bodyData,
+          ...existingTargetData
+        });
+        // 渲染完数据后，手动执行一次计算以同步 UI
+        this.calculateTarget();
+        return;
+      }
+
+      // 只有在没有历史数据时，才执行初始化逻辑
       const isSimpleMode = bodyData.isSimpleMode !== undefined ? bodyData.isSimpleMode : true;
-      
-      // 智能判断初始方向：如果 BMI > 25，默认推荐减脂；否则推荐增肌
       const initialGoal = bodyData.bmi > 25 ? 'fat_loss' : 'muscle';
-      
-      // 默认目标体脂设定：男 15%，女 22% (针对精细版)
       const defaultTargetFat = bodyData.gender === 'male' ? 15 : 22;
       
       this.setData({ 
@@ -80,8 +87,22 @@ Page({
     this.setData({ showBFRef: !this.data.showBFRef });
   },
 
+  previewRefImage() {
+    const gender = this.data.bodyData.gender;
+    const url = `/images/bf_${gender}.jpg`;
+    wx.previewImage({
+      urls: [url],
+      current: url
+    });
+  },
+
+  stopBubble() {
+    // 阻止冒泡
+  },
+
   // 简单版选择目标
   selectTargetOption(e) {
+    wx.vibrateShort({ type: 'light' });
     const index = e.currentTarget.dataset.index;
     const option = this.data.targetOptions[this.data.goal][index];
     
@@ -96,34 +117,35 @@ Page({
     this.calculateTargetByFat();
   },
 
-  onGoalChange(e) {
+  // 8.0 Apple 风格选择处理
+  selectGoal(e) {
+    wx.vibrateShort({ type: 'light' });
+    const goal = e.currentTarget.dataset.goal;
     this.setData({ 
-      goal: e.detail.value,
-      selectedTargetIndex: 1 // 切换目标时重置为中间选项
+      goal,
+      selectedTargetIndex: 1 
     });
     if (this.data.isSimpleMode) {
       this.selectTargetOption({ currentTarget: { dataset: { index: 1 } } });
     } else {
-      this.calculateTarget();
+      this.calculateTargetByFat();
     }
   },
 
-  onModeChange(e) {
-    this.setData({ trainingMode: e.detail.value });
-  },
-
-  onTargetWeightInput(e) {
-    this.setData({ targetWeight: Number(e.detail.value) });
+  selectMode(e) {
+    wx.vibrateShort({ type: 'light' });
+    this.setData({ trainingMode: e.currentTarget.dataset.mode });
     this.calculateTarget();
   },
 
-  onTargetFatChange(e) {
+  onFatChange(e) {
+    wx.vibrateShort({ type: 'light' });
     this.setData({ targetBodyFat: Number(e.detail.value) });
     this.calculateTargetByFat();
   },
 
-  onLevelChange(e) {
-    this.setData({ levelIndex: Number(e.detail.value) });
+  onTargetWeightInput(e) {
+    this.setData({ targetWeight: Number(e.detail.value) });
     this.calculateTarget();
   },
 
@@ -152,8 +174,8 @@ Page({
     const { goal, targetWeight, bodyData } = this.data;
     if (!bodyData || !targetWeight) return;
 
-    const tdee = bodyData.tdee;
-    const currentWeight = bodyData.weight;
+    const tdee = bodyData.tdee || 2000;
+    const currentWeight = bodyData.weight || 70;
     let calorieOffset = 0;
     let weightChangeRate = 0; // kg per week
 
@@ -161,14 +183,16 @@ Page({
       calorieOffset = 250; // 盈余
       weightChangeRate = 0.2; // 建议每周增重 0.2kg (高质量增肌)
     } else {
-      calorieOffset = -400; // 缺口
-      weightChangeRate = 0.5; // 建议每周减重 0.5kg
+      // 严谨性：如果 BMI 已经很低，不建议激进减脂
+      const currentBMI = bodyData.bmi || 22;
+      calorieOffset = currentBMI < 19 ? -200 : -400; 
+      weightChangeRate = currentBMI < 19 ? 0.2 : 0.5;
     }
 
     const weightDiff = Math.abs(targetWeight - currentWeight);
-    const estimatedWeeks = Math.ceil(weightDiff / weightChangeRate);
+    const estimatedWeeks = Math.max(4, Math.ceil(weightDiff / weightChangeRate)); // 最少4周计划
     const estimatedDays = estimatedWeeks * 7;
-    const dailyCalories = Math.round(tdee + calorieOffset);
+    const dailyCalories = Math.max(1200, Math.round(tdee + calorieOffset)); // 严谨性：每日摄入不低于 1200kcal 安全线
 
     // 计算三大营养素 (硬核配比)
     // 蛋白质: 增肌 2.2g/kg, 减脂 2.0g/kg
@@ -189,11 +213,14 @@ Page({
   },
 
   saveAndNext() {
+    wx.vibrateShort({ type: 'medium' });
     const { goal, trainingMode, targetWeight, targetBodyFat, levelIndex, dailyCalories, estimatedDays, estimatedWeeks, isSimpleMode, macros } = this.data;
     const targetData = { goal, trainingMode, targetWeight, targetBodyFat, levelIndex, dailyCalories, estimatedDays, estimatedWeeks, isSimpleMode, macros };
     wx.setStorageSync('targetData', targetData);
-    wx.switchTab({
-      url: '/pages/strength/strength'
+    
+    // 逻辑调整：完成前置引导，进入正式 TabBar 界面
+    wx.reLaunch({
+      url: '/pages/plan/plan'
     });
   }
 })

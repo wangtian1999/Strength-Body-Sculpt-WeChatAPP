@@ -14,6 +14,8 @@ Page({
     lbm: 0,
     showBFRef: false, // 是否显示体脂参考图
     showHelpModal: false, // 是否显示使用说明
+    levels: ['新手 (0-6个月)', '初级 (6-12个月)', '中级 (1-2年)', '高级 (2年以上)'],
+    levelIndex: 0,
 
     // 简单版选择配置
     ranges: {
@@ -53,19 +55,37 @@ Page({
       height: 2,
       weight: 2,
       fat: 1
+    },
+    // 5.0 力量推算数据 (合并至录入页)
+    estimatedSBD: { squat: 0, bench: 0, deadlift: 0 },
+    strengthLevel: { label: '未入门', class: 'untrained' },
+    startRange: {
+      squatMin: 0, squatMax: 0,
+      benchMin: 0, benchMax: 0,
+      deadliftMin: 0, deadliftMax: 0
     }
   },
 
   onLoad() {
     const bodyData = wx.getStorageSync('bodyData');
+    const strengthData = wx.getStorageSync('strengthData');
+    
     if (bodyData) {
       this.setData(bodyData);
-    } else {
-      // 初始计算一次
+    }
+    
+    if (strengthData) {
+      this.setData({
+        levelIndex: strengthData.levelIndex || 0,
+        startRange: strengthData.startRange || this.data.startRange
+      });
+    }
+
+    if (!bodyData && !strengthData) {
       this.calculateResults();
     }
 
-    // 自动弹出使用说明 (如果是第一次打开，或者你可以根据需求调整为每次都弹)
+    // 统一首次进入引导逻辑
     const hasShownHelp = wx.getStorageSync('hasShownHelp');
     if (!hasShownHelp) {
       this.setData({ showHelpModal: true });
@@ -99,6 +119,9 @@ Page({
     const item = this.data.ranges[type][index];
     const key = type === 'fat' ? 'bodyFat' : type;
     
+    // Apple 触感反馈
+    wx.vibrateShort({ type: 'light' });
+
     const updateData = {};
     updateData['selectedIndices.' + type] = index;
     updateData[key] = item.value;
@@ -107,6 +130,7 @@ Page({
   },
 
   onGenderChange(e) {
+    wx.vibrateShort({ type: 'medium' });
     this.setData({ gender: e.detail.value });
     this.calculateResults();
   },
@@ -138,21 +162,40 @@ Page({
     this.calculateLBM();
   },
 
+  onLevelChange(e) {
+    const levelIndex = Number(e.detail.value);
+    wx.vibrateShort({ type: 'light' });
+    this.setData({ levelIndex }, () => {
+      this.calculateStrength();
+    });
+  },
+
+  previewRefImage() {
+    const gender = this.data.gender;
+    const url = `/images/bf_${gender}.jpg`;
+    wx.previewImage({
+      urls: [url],
+      current: url
+    });
+  },
+
   calculateResults(resetFat = false) {
     const { gender, weight, height, age } = this.data;
     if (!weight || !height || !age) return;
     
     const bmi = util.calculateBMI(weight, height);
     const bmr = util.calculateBMR(gender, weight, height, age);
-    const tdee = util.calculateTDEE(bmr);
+    const tdee = util.calculateTDEE(bmr, bmi);
     
     const updateData = { bmi, bmr, tdee };
     if (resetFat || this.data.bodyFat === 0) {
       updateData.bodyFat = util.estimateBodyFat(gender, age, bmi);
     }
     
-    this.setData(updateData);
-    this.calculateLBM();
+    this.setData(updateData, () => {
+      this.calculateLBM();
+      this.calculateStrength(); // 每次身材变动自动重算力量推算
+    });
   },
 
   calculateLBM() {
@@ -161,18 +204,67 @@ Page({
     this.setData({ lbm });
   },
 
+  calculateStrength() {
+    const { gender, weight, bmi, levelIndex } = this.data;
+    // 映射 UI 等级到算法等级
+    const levelMap = ['beginner', 'beginner', 'intermediate', 'intermediate'];
+    const levelKey = levelMap[levelIndex] || 'beginner';
+    
+    const sbd = util.estimateSBD(gender, weight, bmi, levelKey);
+    const total = sbd.squat + sbd.bench + sbd.deadlift;
+    const strengthLevel = util.getStrengthLevel(gender, weight, bmi, total);
+    
+    // 起步重量建议 (5x5 训练重量通常为 1RM 的 60% - 70%)
+    const startRange = {
+      squatMin: Math.round(sbd.squat * 0.6),
+      squatMax: Math.round(sbd.squat * 0.75),
+      benchMin: Math.round(sbd.bench * 0.6),
+      benchMax: Math.round(sbd.bench * 0.75),
+      deadliftMin: Math.round(sbd.deadlift * 0.6),
+      deadliftMax: Math.round(sbd.deadlift * 0.75)
+    };
+
+    this.setData({
+      estimatedSBD: sbd,
+      strengthLevel,
+      startRange
+    });
+  },
+
+  onWeightAdj(e) {
+    const key = e.currentTarget.dataset.key;
+    const val = e.detail.value;
+    const startRange = this.data.startRange;
+    
+    // 触感反馈
+    if (val !== startRange[key]) {
+      wx.vibrateShort({ type: 'light' });
+    }
+
+    startRange[key] = val;
+    this.setData({ startRange });
+  },
+
   saveAndNext() {
+    wx.vibrateShort({ type: 'medium' });
     const { 
       gender, age, height, weight, bmi, bmr, tdee, bodyFat, lbm,
-      isSimpleMode, selectedIndices 
+      isSimpleMode, selectedIndices, estimatedSBD, startRange, strengthLevel,
+      levelIndex
     } = this.data;
     
     const bodyData = { 
       gender, age, height, weight, bmi, bmr, tdee, bodyFat, lbm,
       isSimpleMode, selectedIndices 
     };
+    // 合并力量数据到本地存储
+    const strengthData = { estimatedSBD, startRange, strengthLevel, levelIndex };
+    
     wx.setStorageSync('bodyData', bodyData);
-    wx.switchTab({
+    wx.setStorageSync('strengthData', strengthData);
+    
+    // 逻辑调整：从 switchTab 改为线性跳转，作为前置引导
+    wx.navigateTo({
       url: '/pages/target/target'
     });
   }

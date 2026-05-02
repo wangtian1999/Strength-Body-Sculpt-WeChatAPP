@@ -1,9 +1,9 @@
 {
   "pages": [
+    "pages/plan/plan",
+    "pages/me/me",
     "pages/input/input",
-    "pages/target/target",
-    "pages/strength/strength",
-    "pages/plan/plan"
+    "pages/target/target"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -19,20 +19,12 @@
     "borderStyle": "white",
     "list": [
       {
-        "pagePath": "pages/input/input",
-        "text": "录入"
-      },
-      {
-        "pagePath": "pages/target/target",
-        "text": "规划"
-      },
-      {
-        "pagePath": "pages/strength/strength",
-        "text": "推算"
-      },
-      {
         "pagePath": "pages/plan/plan",
         "text": "计划"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "text": "我的"
       }
     ]
   },

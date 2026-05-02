@@ -1,217 +1,163 @@
-.radio-group {
-  display: flex;
-  gap: 20rpx;
-  margin-bottom: 30rpx;
-}
-
-.radio-label {
-  flex: 1;
-  text-align: center;
-  padding: 20rpx;
-  border: 1rpx solid #333;
-  color: #888;
-}
-
-.radio-label.active {
-  border-color: #fff;
-  color: #fff;
-  background-color: #1a1a1a;
-}
-
-.radio-label radio {
-  display: none;
-}
-
-.result-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20rpx;
-}
-
-.result-card {
-  padding: 20rpx;
-  border-left: 10rpx solid #fff;
-}
-
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
-
-.right-actions {
-  display: flex;
-  align-items: center;
-  gap: 15rpx;
-}
-
-.help-btn {
-  font-size: 22rpx;
-  padding: 10rpx 20rpx;
-  border: 1rpx solid #00ff00;
-  color: #00ff00;
-  font-family: 'Courier New', Courier, monospace;
-}
-
-/* 帮助弹窗样式 */
-.help-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  z-index: 1000;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  padding: 40rpx;
-  box-sizing: border-box;
-}
-
-.help-modal.show {
-  display: flex;
-}
-
-.help-content {
-  width: 100%;
-  max-height: 85vh;
-  background: #0a0a0a;
-  border: 2rpx solid #333;
-  padding: 40rpx;
+.ios-item-vertical {
   display: flex;
   flex-direction: column;
+  padding: 16px;
+  border-bottom: 0.5px solid var(--ios-light-gray);
 }
 
-.help-header {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #fff;
-  margin-bottom: 40rpx;
-  border-left: 8rpx solid #00ff00;
-  padding-left: 20rpx;
-  letter-spacing: 2rpx;
+.ios-item-vertical:last-child {
+  border-bottom: none;
 }
 
-.help-scroll {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 40rpx;
+.ios-item-vertical .label {
+  font-size: 13px;
+  color: var(--ios-text-gray);
+  margin-bottom: 12px;
 }
 
-.help-section {
-  margin-bottom: 30rpx;
-}
-
-.help-title {
-  font-size: 26rpx;
-  color: #00ff00;
-  font-weight: bold;
-  margin-bottom: 10rpx;
-}
-
-.help-text {
-  font-size: 24rpx;
-  color: #bbb;
-  line-height: 1.8;
-  margin-bottom: 10rpx;
-}
-
-.highlight-text {
-  color: #fff;
-  font-weight: bold;
-}
-
-.mode-toggle {
-  font-size: 22rpx;
-  padding: 10rpx 20rpx;
-  border: 1rpx solid #444;
-  color: #888;
-  font-family: 'Courier New', Courier, monospace;
-}
-
-.mode-toggle.detail {
-  color: #00ff00;
-  border-color: #00ff00;
-}
-
-.range-selector {
+.ios-radio-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 15rpx;
-  margin-bottom: 30rpx;
+  background: var(--ios-light-gray);
+  padding: 2px;
+  border-radius: 8px;
+}
+
+.ios-radio-label {
+  padding: 4px 16px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.ios-radio-label.active {
+  background: #636366;
+  color: #fff;
+}
+
+.range-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
 .range-item {
-  padding: 15rpx 25rpx;
-  border: 1rpx solid #333;
-  font-size: 24rpx;
-  color: #666;
-  background: #0a0a0a;
+  background: var(--ios-light-gray);
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 12px;
+  border-radius: 8px;
+  color: #fff;
 }
 
 .range-item.active {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
-  font-weight: bold;
+  background: #fff;
+  color: #000;
 }
 
-.tip-inline {
-  font-size: 20rpx;
-  color: #666;
-  margin-left: 20rpx;
+.ios-input {
+  text-align: right;
+  font-size: 17px;
 }
 
 .label-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10rpx;
+  margin-bottom: 12px;
 }
 
-.ref-link {
-  font-size: 20rpx;
-  color: #00ff00;
-  text-decoration: underline;
+.link-apple {
+  color: var(--ios-blue);
+  font-size: 13px;
 }
 
-.bf-ref-container {
-  display: none;
-  margin-top: 20rpx;
-  border-top: 1rpx solid #333;
-  padding-top: 20rpx;
+.ios-slider {
+  margin: 10px 0;
 }
 
-.bf-ref-container.show {
-  display: block;
+.stats-item {
+  justify-content: space-around;
+  padding: 20px 0;
 }
 
-.bf-ref-img {
-  width: 100%;
-  border: 1rpx solid #444;
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.result-card.highlight {
-  border-left-color: #00ff00;
-  grid-column: span 1;
+.stat-label {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  margin-bottom: 4px;
 }
 
-.fat-input-row {
+.stat-val {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.level-badge-ios {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--ios-light-gray);
+}
+
+.level-badge-ios.novice { color: var(--ios-green); }
+.level-badge-ios.intermediate { color: var(--ios-blue); }
+
+.ios-footer-tip {
+  font-size: 12px;
+  color: var(--ios-text-gray);
+  text-align: center;
+  margin: 20px 0;
+  padding: 0 20px;
+}
+
+/* 移除冗余的 Modal 样式，已移至 app.wxss */
+.picker-value-ios {
+  font-size: 17px;
+  color: #fff;
   display: flex;
   align-items: center;
-  gap: 20rpx;
 }
 
-.fat-slider {
-  flex: 1;
-  margin: 0;
+.arrow {
+  color: var(--ios-text-gray);
+  margin-left: 8px;
+  font-size: 14px;
 }
 
-.tip {
-  font-size: 20rpx;
-  color: #666;
-  margin-top: 10rpx;
-  display: block;
+.sbd-estimate-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 0.5px solid var(--ios-light-gray);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sbd-estimate-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.sbd-estimate-item .lab {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.sbd-estimate-item .val {
+  font-size: 17px;
+  font-weight: 700;
+  font-family: 'SF Pro Display', -apple-system, sans-serif;
+}
+
+.sbd-estimate-item .unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ios-text-gray);
+  margin-left: 4px;
 }
