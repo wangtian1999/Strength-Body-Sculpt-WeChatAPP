@@ -48,7 +48,10 @@ Page({
       // 只有在没有历史数据时，才执行初始化逻辑
       const isSimpleMode = bodyData.isSimpleMode !== undefined ? bodyData.isSimpleMode : true;
       const initialGoal = bodyData.bmi > 25 ? 'fat_loss' : 'muscle';
-      const defaultTargetFat = bodyData.gender === 'male' ? 15 : 22;
+      const isMale = bodyData.gender === 'male';
+      const defaultTargetFat = initialGoal === 'muscle' 
+        ? (isMale ? 15 : 22) 
+        : (isMale ? 12 : 20);
       
       this.setData({ 
         bodyData,

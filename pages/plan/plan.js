@@ -19,6 +19,7 @@ Page({
     timerDisplay: '03:00',
     restTime: 0, // 休息计时
     timer: null,
+    energyScore: 3,
     strengthLevel: { label: '未入门', class: 'untrained' },
     showBFRef: false
   },
@@ -108,18 +109,24 @@ Page({
       plan = this.generateCardioPlan(week);
     }
 
-    this.setData({ weeklyPlan: plan });
+    const foodExchange = util.getFoodExchange(targetData.macros, 'meat'); // 默认肉类，后续可从 me 页面读取偏好
+
+    this.setData({ 
+      weeklyPlan: plan,
+      foodExchange
+    });
   },
 
   generateGymPlan(week, start) {
     if (!start) return [];
-    const { targetData, swappedExercises, deloadWeeks, bodyData } = this.data;
+    const { targetData, swappedExercises, deloadWeeks, bodyData, energyScore } = this.data;
     const isMuscle = targetData.goal === 'muscle';
     const isDeload = deloadWeeks[`W${week}`];
+    const recovery = util.getRecoveryAdjustment(energyScore);
     
-    const squatInc = util.getWeightIncrement(start.squatMin, bodyData.gender);
-    const benchInc = util.getWeightIncrement(start.benchMin, bodyData.gender);
-    const deadliftInc = util.getWeightIncrement(start.deadliftMin, bodyData.gender);
+    const squatInc = util.getWeightIncrement(start.squatMin, bodyData.gender, bodyData.age, bodyData.bmi);
+    const benchInc = util.getWeightIncrement(start.benchMin, bodyData.gender, bodyData.age, bodyData.bmi);
+    const deadliftInc = util.getWeightIncrement(start.deadliftMin, bodyData.gender, bodyData.age, bodyData.bmi);
 
     let multiplier = isMuscle ? 1 : 0.5;
     if (isDeload) multiplier = 0; 
@@ -129,14 +136,16 @@ Page({
     }
 
     const baseWeights = {
-      squat: (start.squatMin + (week - 1) * squatInc * multiplier),
-      bench: (start.benchMin + (week - 1) * benchInc * multiplier),
-      deadlift: (start.deadliftMin + (week - 1) * deadliftInc * multiplier)
+      squat: (start.squatMin + (week - 1) * squatInc * multiplier) * recovery.weightMult,
+      bench: (start.benchMin + (week - 1) * benchInc * multiplier) * recovery.weightMult,
+      deadlift: (start.deadliftMin + (week - 1) * deadliftInc * multiplier) * recovery.weightMult
     };
 
     if (isDeload) {
       Object.keys(baseWeights).forEach(k => baseWeights[k] *= 0.9);
     }
+
+    const setsAdjust = (defaultSets) => Math.max(1, Math.round(defaultSets * recovery.setsMult));
 
     const getExData = (id, defaultName, baseWeight) => {
       const name = swappedExercises[id] || defaultName;
@@ -148,19 +157,19 @@ Page({
 
     return [
       {
-        day: isDeload ? `减载周 A (恢复性训练)` : (isMuscle ? '训练日 A (深蹲+卧推)' : '力量维持 A (深蹲+卧推)'),
+        day: isDeload ? `减载周 A 恢复训练` : (isMuscle ? '训练日 A 深蹲+卧推' : '力量维持 A 深蹲+卧推'),
         exercises: [
-          { ...getExData(`W${week}-A-0`, '深蹲 (SQUAT)', baseWeights.squat), sets: isDeload ? 3 : 5, reps: 5, restSec: 180 },
-          { ...getExData(`W${week}-A-1`, '卧推 (BENCH)', baseWeights.bench), sets: isDeload ? 3 : 5, reps: 5, restSec: 180 },
-          { id: `W${week}-A-2`, name: '辅助动作 (划船/引体)', sets: 3, reps: '8-12', weight: '-', restSec: 60, tip: '控制节奏，感受拉伸。' }
+          { ...getExData(`W${week}-A-0`, '深蹲', baseWeights.squat), sets: setsAdjust(isDeload ? 3 : 5), reps: 5, restSec: 180 },
+          { ...getExData(`W${week}-A-1`, '卧推', baseWeights.bench), sets: setsAdjust(isDeload ? 3 : 5), reps: 5, restSec: 180 },
+          { id: `W${week}-A-2`, name: '辅助动作 划船/引体', sets: setsAdjust(3), reps: '8-12', weight: '-', restSec: 60, tip: '控制节奏，感受拉伸。' }
         ]
       },
       {
-        day: isDeload ? `减载周 B (恢复性训练)` : (isMuscle ? '训练日 B (硬拉+推举)' : '力量维持 B (硬拉+推举)'),
+        day: isDeload ? `减载周 B 恢复训练` : (isMuscle ? '训练日 B 硬拉+推举' : '力量维持 B 硬拉+推举'),
         exercises: [
-          { ...getExData(`W${week}-B-0`, '硬拉 (DEADLIFT)', baseWeights.deadlift), sets: 1, reps: 5, restSec: 240 },
-          { ...getExData(`W${week}-B-1`, '站姿推举 (PRESS)', baseWeights.bench * 0.7), sets: isDeload ? 3 : 5, reps: 5, restSec: 120 },
-          { id: `W${week}-B-2`, name: '辅助动作 (核心/小肌群)', sets: 3, reps: '10-15', weight: '-', restSec: 60, tip: '加强核心稳定性。' }
+          { ...getExData(`W${week}-B-0`, '硬拉', baseWeights.deadlift), sets: 1, reps: 5, restSec: 240 },
+          { ...getExData(`W${week}-B-1`, '站姿推举', baseWeights.bench * 0.7), sets: setsAdjust(isDeload ? 3 : 5), reps: 5, restSec: 120 },
+          { id: `W${week}-B-2`, name: '辅助动作 核心/小肌群', sets: setsAdjust(3), reps: '10-15', weight: '-', restSec: 60, tip: '加强核心稳定性。' }
         ]
       }
     ];
@@ -178,11 +187,11 @@ Page({
 
     return [
       {
-        day: `自重训练 A (${level})`,
+        day: `自重训练 A ${level}`,
         exercises: [
-          { ...getExData(`W${week}-H-A0`, '俯卧撑 (PUSHUPS)', pushups), sets: 3, restSec: 90 },
-          { ...getExData(`W${week}-H-A1`, '自重深蹲 (SQUATS)', squats), sets: 3, restSec: 90 },
-          { id: `W${week}-H-A2`, name: '平板支撑 (PLANK)', sets: 3, reps: (45 + week * 5) + 's', weight: '自重', restSec: 60, tip: '收紧核心，不要塌腰。' }
+          { ...getExData(`W${week}-H-A0`, '俯卧撑', pushups), sets: 3, restSec: 90 },
+          { ...getExData(`W${week}-H-A1`, '自重深蹲', squats), sets: 3, restSec: 90 },
+          { id: `W${week}-H-A2`, ...getExData(`W${week}-H-A2`, '平板支撑', (45 + week * 5) + 's'), sets: 3, restSec: 60 }
         ]
       }
     ];
@@ -201,16 +210,16 @@ Page({
 
     return [
       {
-        day: `有氧 A (${level})`,
+        day: `有氧 A ${level}`,
         exercises: [
-          { ...getExData(`W${week}-C-A0`, '慢跑 (JOGGING)', distance + ' km', '持续'), sets: 1, restSec: 0 },
-          { ...getExData(`W${week}-C-A1`, '拉伸 (STRETCH)', '10 min', '-'), sets: 1, restSec: 0 }
+          { ...getExData(`W${week}-C-A0`, '慢跑', distance + ' km', '持续'), sets: 1, restSec: 0 },
+          { ...getExData(`W${week}-C-A1`, '拉伸', '10 min', '-'), sets: 1, restSec: 0 }
         ]
       },
       {
-        day: `有氧 B (${level})`,
+        day: `有氧 B ${level}`,
         exercises: [
-          { ...getExData(`W${week}-C-B0`, 'HIIT (间歇训练)', '30s 冲刺 / 60s 慢走', '全力'), sets: week + 4, restSec: 60 }
+          { ...getExData(`W${week}-C-B0`, 'HIIT 间歇训练', '30s 冲刺 / 60s 慢走', '全力'), sets: week + 4, restSec: 60 }
         ]
       }
     ];
@@ -313,6 +322,12 @@ Page({
         }
       });
     }
+  },
+
+  onEnergyChange(e) {
+    const energyScore = Number(e.detail.value);
+    this.setData({ energyScore });
+    this.generatePlan(this.data.currentWeek);
   },
 
   toggleExDetail(e) {

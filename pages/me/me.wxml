@@ -7,13 +7,16 @@
       <view class="avatar-placeholder-ios">{{bodyData.gender === 'male' ? 'M' : 'F'}}</view>
       <view class="profile-info-ios">
         <text class="profile-name-ios">{{bodyData.age}} 岁 · {{bodyData.height}}cm</text>
-        <text class="profile-status-ios">当前状态: {{strengthLevel.label}}</text>
+        <view class="profile-status-row">
+          <text class="profile-status-ios">当前状态: {{strengthLevel.label}}</text>
+          <text class="ios-tip">基于 SBD 总重量的力量分级</text>
+        </view>
       </view>
     </view>
   </view>
 
   <!-- 身体数据卡片 -->
-  <view class="section-header">身体数据 (BODY DATA)</view>
+  <view class="section-header">身体数据 BODY DATA</view>
   <view class="ios-group">
     <view class="ios-item">
       <text>体重</text>
@@ -28,13 +31,16 @@
       <text class="ios-value-highlight">{{bodyData.bodyFat}}%</text>
     </view>
     <view class="ios-item">
-      <text>TDEE</text>
+      <view class="item-left">
+        <text>TDEE</text>
+        <view class="ios-tip">每日总消耗热量</view>
+      </view>
       <text class="ios-value-highlight">{{bodyData.tdee}} kcal</text>
     </view>
   </view>
 
   <!-- 力量记录 -->
-  <view class="section-header">力量基准 (INITIAL SBD)</view>
+  <view class="section-header">力量基准 INITIAL SBD</view>
   <view class="ios-group sbd-card-ios">
     <view class="sbd-row-ios">
       <view class="sbd-col-ios">
@@ -50,6 +56,7 @@
         <text class="sbd-val-ios">{{strengthData.startRange.deadliftMin}}kg</text>
       </view>
     </view>
+    <view class="ios-tip-center">力量基准: 计划第 1 周的起步重量。通过每周线性增加 2.5-5kg 来实现“超负荷”，从而驱动肌肉增长。</view>
   </view>
 
   <!-- 系统设置 -->
@@ -73,7 +80,7 @@
   </view>
 
   <view class="ios-footer-tip">
-    健力塑身 v1.0 · 数字健身，量化进化
+    健力塑身 v1.0 · 数字健身，快速进化
   </view>
 
   <!-- 使用说明 Modal (通用) -->
@@ -81,20 +88,32 @@
     <view class="modal-content help-content-ios" catchtap="stopBubble">
       <scroll-view scroll-y="true" class="help-scroll-ios">
         <view class="help-section">
-          <view class="help-title">Who · 针对人群</view>
-          <view class="help-text">本工具专为 0-2 年健身初学者设计，解决“不知道练什么”、“不知道练多重”和“如何进阶”的核心痛点。</view>
+          <view class="help-title">Who · 它是为谁设计的</view>
+          <view class="help-text">专门为 0-2 年健身经验的小白设计。如果你不知道进健身房该练什么、该用多重的哑铃、或者不知道怎么练才能看到身材变化，这个工具就是为你准备的。</view>
         </view>
         <view class="help-section">
-          <view class="help-title">What · 它是做什么的</view>
-          <view class="help-text">基于“数字健身”理念，通过身材推算力量基准，并生成 SBD（深蹲/卧推/硬拉）渐进超负荷计划，让肌肉增长量化可见。</view>
+          <view class="help-title">What · 这个 App 是干什么的</view>
+          <view class="help-text">它是一个“数字健身教练”。它不需要你手动记录复杂的动作和组数，而是通过一套智能算法，根据你的身材告诉你：\n1. 你现在的力量大概是什么水平；\n2. 你该从多重的重量开始练；\n3. 接下来 12 周，每周该怎么加重。它帮你规划好了一切，你只需要按计划执行即可。</view>
         </view>
         <view class="help-section">
-          <view class="help-title">How · 如何使用</view>
-          <view class="help-text">1. 录入身体数据；\n2. 设定增肌或减脂目标；\n3. 获取推算力量并进行微调；\n4. 开启 12 周训练计划并按周执行。</view>
+          <view class="help-title">How · 如何快速上手</view>
+          <view class="help-text">1. 录入身体数据；\n2. 设定目标（想变壮还是变瘦）；\n3. 微调起步重量；\n4. 开启 12 周计划并按周执行。建议“练一休一”，每周训练 3 次，肌肉是在休息时长的。</view>
         </view>
         <view class="help-section">
-          <view class="help-title">Why · 为什么是三大项</view>
-          <view class="help-text">力量驱动型塑形：力量的提升是肌肉增长最稳定的驱动力。SBD 是人体多关节复合动作的基石，效率最高。</view>
+          <view class="help-title">Why · 为什么练这几个动作</view>
+          <view class="help-text">力量驱动身材：肌肉不是凭空长出来的，当你的力量变强了，身材自然会变好。深蹲、卧推、硬拉是健身界的“黄金动作”，效率最高。</view>
+        </view>
+        <view class="help-section">
+          <view class="help-title">TDEE · 你的热量账本</view>
+          <view class="help-text">就像你的银行余额。TDEE 是你每天维持体重不增不减所需的总热量。想增肌就多吃点（存钱），想减脂就少吃点（花钱）。</view>
+        </view>
+        <view class="help-section">
+          <view class="help-title">LBM · 瘦体重</view>
+          <view class="help-text">就是去掉全身脂肪后剩下的重量（骨头、肌肉、水分等）。肌肉越多，瘦体重就越高，基础代谢也越强，越不容易长胖。</view>
+        </view>
+        <view class="help-section">
+          <view class="help-title">LP · 步步为营法</view>
+          <view class="help-text">线性进阶（Linear Progression）。意思是每周在相同动作上增加一点点重量。这是新手期进步最快、最科学的方法。</view>
         </view>
       </scroll-view>
       <view class="modal-close" bindtap="hideHelp">了解并开始</view>

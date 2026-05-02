@@ -25,15 +25,24 @@
         <text class="link-apple" bindtap="toggleBFRef">参考图</text>
       </view>
       <slider class="ios-slider" min="{{goal === 'muscle' ? 8 : 5}}" max="{{goal === 'muscle' ? 20 : 35}}" step="1" value="{{targetBodyFat}}" bindchange="onFatChange" activeColor="#fff" />
+      <view class="ios-tip">
+        {{goal === 'muscle' ? '增肌建议: 男 12-15% | 女 18-22%' : '减脂建议: 男 10-12% | 女 18-20%'}}
+      </view>
     </view>
     
     <view class="ios-item">
-      <text>预估目标体重</text>
+      <view class="item-left">
+        <text>预估目标体重</text>
+        <view class="ios-tip">基于体脂目标的科学计算</view>
+      </view>
       <text class="ios-value-highlight">{{targetWeight}}kg</text>
     </view>
 
     <view class="ios-item">
-      <text>预估达成周期</text>
+      <view class="item-left">
+        <text>预估达成周期</text>
+        <view class="ios-tip">建议每周减重 0.5-1kg 为宜</view>
+      </view>
       <text class="ios-value-highlight">{{estimatedWeeks}}周</text>
     </view>
   </view>
@@ -50,16 +59,19 @@
         <view class="dot protein"></view>
         <text class="m-lab">蛋白质</text>
         <text class="m-val">{{macros.protein}}g</text>
+        <text class="ios-tip">修复肌肉</text>
       </view>
       <view class="macro-item-ios">
         <view class="dot carb"></view>
         <text class="m-lab">碳水</text>
         <text class="m-val">{{macros.carb}}g</text>
+        <text class="ios-tip">能量来源</text>
       </view>
       <view class="macro-item-ios">
         <view class="dot fat"></view>
         <text class="m-lab">脂肪</text>
         <text class="m-val">{{macros.fat}}g</text>
+        <text class="ios-tip">激素平衡</text>
       </view>
     </view>
   </view>

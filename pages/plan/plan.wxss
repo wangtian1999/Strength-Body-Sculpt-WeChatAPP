@@ -191,3 +191,54 @@
   margin-top: 32px;
   margin-bottom: 50px;
 }
+
+.energy-card-ios {
+  padding: 16px;
+}
+
+.energy-tip-ios {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ios-blue);
+}
+
+.food-card-ios {
+  padding: 16px;
+}
+
+.food-exchange-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.food-type-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ios-text-gray);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.food-item {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.food-name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.food-amount {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.food-tip {
+  font-size: 10px;
+  color: var(--ios-text-gray);
+  margin-top: 2px;
+}

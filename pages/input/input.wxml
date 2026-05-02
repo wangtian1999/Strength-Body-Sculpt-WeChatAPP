@@ -59,7 +59,10 @@
     </block>
 
     <view class="ios-item">
-      <text>训练基础</text>
+      <view class="item-left">
+        <text>训练基础</text>
+        <view class="ios-tip">决定起步力量推算的基准</view>
+      </view>
       <picker bindchange="onLevelChange" value="{{levelIndex}}" range="{{levels}}">
         <view class="picker-value-ios">
           {{levels[levelIndex]}}
@@ -73,45 +76,55 @@
   <view class="section-header">体型状态</view>
   <view class="ios-group">
     <view class="ios-item-vertical" wx:if="{{isSimpleMode}}">
-      <view class="label-row">
-        <text class="label">体型描述</text>
-        <text class="link-apple" bindtap="toggleBFRef">参考图</text>
+        <view class="label-row">
+          <text class="label">体型描述</text>
+          <text class="link-apple" bindtap="toggleBFRef">参考图</text>
+        </view>
+        <view class="range-grid">
+          <view wx:for="{{ranges.fat}}" wx:key="index" class="range-item {{selectedIndices.fat === index ? 'active' : ''}}" bindtap="selectRange" data-type="fat" data-index="{{index}}">{{item.label}}</view>
+        </view>
+        <view class="ios-tip">
+          {{gender === 'male' ? ranges.fat[selectedIndices.fat].male : ranges.fat[selectedIndices.fat].female}}
+        </view>
       </view>
-      <view class="range-grid">
-        <view wx:for="{{ranges.fat}}" wx:key="index" class="range-item {{selectedIndices.fat === index ? 'active' : ''}}" bindtap="selectRange" data-type="fat" data-index="{{index}}">{{item.label}}</view>
-      </view>
-    </view>
     <view class="ios-item-vertical" wx:else>
       <view class="label-row">
         <text class="label">精确体脂率: {{bodyFat}}%</text>
         <text class="link-apple" bindtap="toggleBFRef">参考图</text>
       </view>
       <slider class="ios-slider" min="3" max="50" step="0.5" value="{{bodyFat}}" bindchange="onFatChange" bindinput="onFatInput" activeColor="#fff" />
+      <view class="ios-tip">
+        {{bodyFat < (gender==='male'?12:20) ? '偏瘦/运动员' : (bodyFat < (gender==='male'?20:28) ? '标准/匀称' : '偏重/丰满')}}
+      </view>
     </view>
     
     <view class="ios-item stats-item">
       <view class="stat-box">
         <text class="stat-label">BMI</text>
         <text class="stat-val">{{bmi}}</text>
+        <text class="stat-tip">指数: {{bmi < 18.5 ? '偏瘦' : (bmi < 24 ? '标准' : (bmi < 28 ? '超重' : '肥胖'))}}</text>
       </view>
       <view class="stat-box">
         <text class="stat-label">TDEE</text>
         <text class="stat-val">{{tdee}}</text>
+        <text class="stat-tip">维持热量</text>
       </view>
       <view class="stat-box">
         <text class="stat-label">瘦体重</text>
         <text class="stat-val">{{lbm}}kg</text>
+        <text class="stat-tip">非脂肪重</text>
       </view>
     </view>
   </view>
 
   <!-- 力量部分 -->
-  <view class="section-header">力量推算与起步修正 (SBD)</view>
+  <view class="section-header">力量推算与起步修正 SBD</view>
   <view class="ios-group">
     <view class="sbd-estimate-row">
       <view class="sbd-estimate-item">
         <text class="lab">系统推算</text>
         <text class="val">{{estimatedSBD.squat}} / {{estimatedSBD.bench}} / {{estimatedSBD.deadlift}} <text class="unit">kg</text></text>
+        <view class="ios-tip">基于您的 BMI 与训练基础推算的保守起步重量</view>
       </view>
       <view class="level-badge-ios {{strengthLevel.class}}">{{strengthLevel.label}}</view>
     </view>
@@ -151,20 +164,32 @@
     <view class="modal-content help-content-ios" catchtap="stopBubble">
       <scroll-view scroll-y="true" class="help-scroll-ios">
         <view class="help-section">
-          <view class="help-title">Who · 针对人群</view>
-          <view class="help-text">本工具专为 0-2 年健身初学者设计，解决“不知道练什么”、“不知道练多重”和“如何进阶”的核心痛点。</view>
+          <view class="help-title">Who · 它是为谁设计的</view>
+          <view class="help-text">专门为 0-2 年健身经验的小白设计。如果你不知道进健身房该练什么、该用多重的哑铃、或者不知道怎么练才能看到身材变化，这个工具就是为你准备的。</view>
         </view>
         <view class="help-section">
-          <view class="help-title">What · 它是做什么的</view>
-          <view class="help-text">基于“数字健身”理念，通过身材推算力量基准，并生成 SBD（深蹲/卧推/硬拉）渐进超负荷计划，让肌肉增长量化可见。</view>
+          <view class="help-title">What · 这个 App 是干什么的</view>
+          <view class="help-text">它是一个“数字健身教练”。它不需要你手动记录复杂的动作和组数，而是通过一套智能算法，根据你的身材告诉你：\n1. 你现在的力量大概是什么水平；\n2. 你该从多重的重量开始练；\n3. 接下来 12 周，每周该怎么加重。它帮你规划好了一切，你只需要按计划执行即可。</view>
         </view>
         <view class="help-section">
-          <view class="help-title">How · 如何使用</view>
-          <view class="help-text">1. 录入身体数据；\n2. 设定增肌或减脂目标；\n3. 获取推算力量并进行微调；\n4. 开启 12 周训练计划并按周执行。</view>
+          <view class="help-title">How · 如何快速上手</view>
+          <view class="help-text">第一步：输入身材数据，让 App 认识你；\n第二步：定下目标（想变壮还是变瘦）；\n第三步：微调起步重量（如果不确定，就选最轻的）；\n第四步：在“训练计划”里按周执行。建议“练一天休一天”，每周练 3 次即可，休息和训练同样重要。</view>
         </view>
         <view class="help-section">
-          <view class="help-title">Why · 为什么是三大项</view>
-          <view class="help-text">力量驱动型塑形：力量的提升是肌肉增长最稳定的驱动力。SBD 是人体多关节复合动作的基石，效率最高。</view>
+          <view class="help-title">Why · 为什么练这几个动作</view>
+          <view class="help-text">力量驱动身材：肌肉不是凭空长出来的，当你的力量变强了，身材自然会变好。深蹲、卧推、硬拉是健身界的“黄金动作”，它们能一次性练到全身最多的肌肉，效率最高。</view>
+        </view>
+        <view class="help-section">
+          <view class="help-title">TDEE · 你的热量账本</view>
+          <view class="help-text">就像你的银行余额。TDEE 是你每天维持体重不增不减所需的总热量。想增肌就多吃点（存钱），想减脂就少吃点（花钱）。</view>
+        </view>
+        <view class="help-section">
+          <view class="help-title">Energy Score · 状态打分</view>
+          <view class="help-text">这是你的“身体电量”。如果昨晚没睡好或压力大，电量低（1-2分），App 会自动帮你减重，防止受伤；如果电量满格，就可以大胆尝试进步。</view>
+        </view>
+        <view class="help-section">
+          <view class="help-title">Body Recomp · 瘦胖子逆袭</view>
+          <view class="help-text">如果你看起来不胖但肚子有肉（BMI 正常但体脂高），不需要激进减脂。通过“身体重组”——保持正常饮食 + 努力练力量，就能实现脂肪变少、肌肉变多的同步进化。</view>
         </view>
       </scroll-view>
       <view class="modal-close" bindtap="hideHelp">了解并开始</view>

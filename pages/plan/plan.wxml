@@ -16,7 +16,10 @@
       </view>
     </view>
     <view class="progress-stats-ios">
-      <text>已完成 {{currentWeek - 1}} / 12 周</text>
+      <view class="stat-left">
+        <text>已完成 {{currentWeek - 1}} / 12 周</text>
+        <view class="ios-tip">建议：每周训练 3 次，练一休一，给肌肉恢复时间</view>
+      </view>
       <text class="strength-badge-ios">{{strengthLevel.label}}</text>
     </view>
   </view>
@@ -28,6 +31,17 @@
       <text class="timer-clock-ios">{{timerDisplay}}</text>
       <view class="timer-close-ios" bindtap="stopTimer">取消</view>
     </view>
+  </view>
+
+  <!-- 能量评分 & 状态调整 -->
+  <view class="section-header">今日状态调整</view>
+  <view class="ios-group energy-card-ios">
+    <view class="label-row">
+      <text class="label">精力评分: {{energyScore}} 分</text>
+      <text class="energy-tip-ios">{{energyScore <= 2 ? '⚠️ 建议减载' : (energyScore >= 4 ? '🚀 状态爆表' : '⚖️ 状态正常')}}</text>
+    </view>
+    <slider class="ios-slider" min="1" max="5" step="1" value="{{energyScore}}" bindchange="onEnergyChange" activeColor="#fff" />
+    <view class="ios-tip">根据评分自动调整今日训练重量与组数</view>
   </view>
 
   <!-- 训练卡片 -->
@@ -67,11 +81,36 @@
     </view>
   </view>
 
+  <!-- 饮食建议卡片 -->
+  <view class="section-header">今日饮食参考 (对应目标营养)</view>
+  <view class="ios-group food-card-ios">
+    <view class="food-exchange-grid">
+      <view class="food-type-col">
+        <text class="food-type-title">优质蛋白 (任选其一)</text>
+        <view wx:for="{{foodExchange.proteinFood}}" wx:key="name" class="food-item">
+          <text class="food-name">{{item.name}}</text>
+          <text class="food-amount">{{item.amount}}{{item.unit}}</text>
+          <text class="food-tip">{{item.tip}}</text>
+        </view>
+      </view>
+      <view class="food-type-col">
+        <text class="food-type-title">主食碳水 (任选其一)</text>
+        <view wx:for="{{foodExchange.carbFood}}" wx:key="name" class="food-item">
+          <text class="food-name">{{item.name}}</text>
+          <text class="food-amount">{{item.amount}}{{item.unit}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- 底部操作区 -->
   <view class="ios-group action-group-ios">
-    <view class="ios-item" bindtap="toggleDeload">
-      <text>{{isDeload ? '恢复正常强度' : '开启减载周 (Deload)'}}</text>
-      <switch checked="{{isDeload}}" disabled color="#34c759" />
+    <view class="ios-item-vertical" bindtap="toggleDeload">
+      <view class="label-row">
+        <text>{{isDeload ? '恢复正常强度' : '开启减载周'}}</text>
+        <switch checked="{{isDeload}}" disabled color="#34c759" />
+      </view>
+      <view class="ios-tip">减载周: 降低 50% 容量或 10% 重量，帮助中枢神经恢复，突破平台期。</view>
     </view>
   </view>
 

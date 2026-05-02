@@ -194,6 +194,35 @@ input {
   line-height: 1.6;
 }
 
+/* 全局小提示样式 */
+.ios-tip {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  margin-top: 4px;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+.item-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.ios-tip-center {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  padding: 12px 16px;
+  text-align: center;
+  line-height: 1.4;
+  opacity: 0.8;
+  border-top: 0.5px solid var(--ios-light-gray);
+}
+
+.profile-status-row {
+  display: flex;
+  align-items: center;
+}
+
 .bf-image {
   width: 100%;
   border-radius: 12px;

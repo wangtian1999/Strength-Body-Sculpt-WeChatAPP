@@ -42,11 +42,11 @@ Page({
         { label: '>95', value: 105 }
       ],
       fat: [
-        { label: '偏瘦', value: 10 },
-        { label: '匀称', value: 15 },
-        { label: '标准', value: 20 },
-        { label: '饱满', value: 28 },
-        { label: '偏胖', value: 35 }
+        { label: '偏瘦', value: 10, male: '男: 8-12% 极低体脂', female: '女: 15-18% 纤细/紧致' },
+        { label: '匀称', value: 15, male: '男: 13-16% 腹肌隐现', female: '女: 19-22% 平坦/匀称' },
+        { label: '标准', value: 20, male: '男: 17-21% 正常/健康', female: '女: 23-27% 曲线/标准' },
+        { label: '饱满', value: 28, male: '男: 22-26% 稍有赘肉', female: '女: 28-32% 丰满/圆润' },
+        { label: '偏胖', value: 35, male: '男: 27%+ 腹部堆积', female: '女: 33%+ 偏胖/丰满' }
       ]
     },
     // 当前简单版选中的索引
@@ -205,12 +205,12 @@ Page({
   },
 
   calculateStrength() {
-    const { gender, weight, bmi, levelIndex } = this.data;
+    const { gender, weight, bmi, age, levelIndex } = this.data;
     // 映射 UI 等级到算法等级
     const levelMap = ['beginner', 'beginner', 'intermediate', 'intermediate'];
     const levelKey = levelMap[levelIndex] || 'beginner';
     
-    const sbd = util.estimateSBD(gender, weight, bmi, levelKey);
+    const sbd = util.estimateSBD(gender, weight, bmi, age, levelKey);
     const total = sbd.squat + sbd.bench + sbd.deadlift;
     const strengthLevel = util.getStrengthLevel(gender, weight, bmi, total);
     

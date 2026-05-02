@@ -40,8 +40,8 @@
     "compileWorklet": false,
     "localPlugins": false,
     "condition": false,
-    "swc": true,
-    "disableSWC": false
+    "swc": false,
+    "disableSWC": true
   },
   "compileType": "miniprogram",
   "libVersion": "3.3.4",
