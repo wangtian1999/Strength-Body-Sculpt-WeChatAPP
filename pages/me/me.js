@@ -63,5 +63,18 @@ Page({
         }
       }
     });
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '健力塑身 - 你的数字健身教练',
+      path: '/pages/input/input'
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: '健力塑身 - 快速进化，量化进步'
+    };
   }
 })

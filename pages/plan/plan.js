@@ -353,5 +353,18 @@ Page({
 
   stopBubble() {
     // 阻止冒泡
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '健力塑身 - 我的12周进化计划已开启',
+      path: '/pages/input/input'
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: '健力塑身 - 12周量化训练计划'
+    };
   }
 })

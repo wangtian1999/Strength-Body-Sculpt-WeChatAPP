@@ -225,5 +225,18 @@ Page({
     wx.reLaunch({
       url: '/pages/plan/plan'
     });
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '健力塑身 - 科学规划你的理想身材',
+      path: '/pages/input/input'
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: '健力塑身 - 科学规划你的理想身材'
+    };
   }
 })
