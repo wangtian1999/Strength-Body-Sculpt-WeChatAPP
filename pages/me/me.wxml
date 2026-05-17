@@ -3,19 +3,19 @@
     <view class="large-title">我的</view>
 
     <!-- 用户概览 Apple Health Style -->
-    <view class="ios-group profile-card-ios haptic-active" bindtap="editProfile">
+    <view class="ios-group profile-card-ios">
       <view class="profile-header-ios">
         <view class="avatar-placeholder-ios">{{bodyData.gender === 'male' ? 'M' : 'F'}}</view>
         <view class="profile-info-ios">
           <view class="profile-name-row-ios">
             <text class="profile-name-ios">{{bodyData.age}} 岁 · {{bodyData.height}}cm</text>
-            <text class="link-apple" style="margin-left: 10px; font-size: 12px;">修改</text>
+            <view class="link-apple-btn" bindtap="editProfile">修改</view>
           </view>
           <view class="profile-status-row">
-            <text class="profile-status-ios">当前状态: {{strengthLevel.label}} ({{strengthLevel.ratio}}x)</text>
-            <text class="link-apple" style="margin-left: 10px;" catchtap="showStrengthLevelDetails">详情</text>
+            <text class="profile-status-ios">当前状态: <text class="status-highlight bg-lv-{{strengthLevel.class}}">{{strengthLevel.label}}</text> ({{strengthLevel.ratio}}x)</text>
+            <view class="link-apple-btn" catchtap="showStrengthLevelDetails">详情</view>
           </view>
-          <text class="ios-tip">SBD总重量与体重的比率</text>
+          <text class="ios-tip-mini">SBD总重量与体重的比率</text>
         </view>
       </view>
     </view>
@@ -167,19 +167,28 @@
           
           <view class="level-table-header" style="margin-top: 20px;">男性标准 (Male)</view>
           <view class="level-table">
-            <view class="level-row-ios">
+            <view class="level-row-ios {{strengthLevel.class === 'untrained' && bodyData.gender === 'male' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-untrained"></view>
               <text class="lv-lab">未入门</text>
               <text class="lv-val">&lt; 1.5x</text>
             </view>
-            <view class="level-row-ios">
+            <view class="level-row-ios {{strengthLevel.class === 'novice' && bodyData.gender === 'male' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-novice"></view>
               <text class="lv-lab">新手</text>
-              <text class="lv-val">1.5x - 2.5x</text>
+              <text class="lv-val">1.5x - 2.0x</text>
             </view>
-            <view class="level-row-ios">
+            <view class="level-row-ios {{strengthLevel.class === 'intermediate' && bodyData.gender === 'male' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-intermediate"></view>
               <text class="lv-lab">初级</text>
-              <text class="lv-val">2.5x - 3.5x</text>
+              <text class="lv-val">2.0x - 2.8x</text>
             </view>
-            <view class="level-row-ios">
+            <view class="level-row-ios {{strengthLevel.class === 'advanced' && bodyData.gender === 'male' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-advanced"></view>
+              <text class="lv-lab">中级</text>
+              <text class="lv-val">2.8x - 3.5x</text>
+            </view>
+            <view class="level-row-ios {{strengthLevel.class === 'elite' && bodyData.gender === 'male' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-elite"></view>
               <text class="lv-lab">精英</text>
               <text class="lv-val">&gt; 3.5x</text>
             </view>
@@ -187,21 +196,30 @@
 
           <view class="level-table-header" style="margin-top: 20px;">女性标准 (Female)</view>
           <view class="level-table">
-            <view class="level-row-ios">
+            <view class="level-row-ios {{strengthLevel.class === 'untrained' && bodyData.gender === 'female' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-untrained"></view>
               <text class="lv-lab">未入门</text>
               <text class="lv-val">&lt; 1.0x</text>
             </view>
-            <view class="level-row-ios">
+            <view class="level-row-ios {{strengthLevel.class === 'novice' && bodyData.gender === 'female' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-novice"></view>
               <text class="lv-lab">新手</text>
-              <text class="lv-val">1.0x - 1.8x</text>
+              <text class="lv-val">1.0x - 1.5x</text>
             </view>
-            <view class="level-row-ios">
+            <view class="level-row-ios {{strengthLevel.class === 'intermediate' && bodyData.gender === 'female' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-intermediate"></view>
               <text class="lv-lab">初级</text>
-              <text class="lv-val">1.8x - 2.5x</text>
+              <text class="lv-val">1.5x - 2.0x</text>
             </view>
-            <view class="level-row-ios">
+            <view class="level-row-ios {{strengthLevel.class === 'advanced' && bodyData.gender === 'female' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-advanced"></view>
+              <text class="lv-lab">中级</text>
+              <text class="lv-val">2.0x - 2.6x</text>
+            </view>
+            <view class="level-row-ios {{strengthLevel.class === 'elite' && bodyData.gender === 'female' ? 'current-level' : ''}}">
+              <view class="level-indicator bg-lv-elite"></view>
               <text class="lv-lab">精英</text>
-              <text class="lv-val">&gt; 2.5x</text>
+              <text class="lv-val">&gt; 2.6x</text>
             </view>
           </view>
         </view>

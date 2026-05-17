@@ -100,11 +100,13 @@ const getStrengthLevel = (gender, weight, bmi, total) => {
   
   if (gender === 'male') {
     if (ratio >= 3.5) level = { label: '精英', class: 'elite', ratio };
-    else if (ratio >= 2.5) level = { label: '初级', class: 'intermediate', ratio };
+    else if (ratio >= 2.8) level = { label: '中级', class: 'advanced', ratio };
+    else if (ratio >= 2.0) level = { label: '初级', class: 'intermediate', ratio };
     else if (ratio >= 1.5) level = { label: '新手', class: 'novice', ratio };
   } else {
-    if (ratio >= 2.5) level = { label: '精英', class: 'elite', ratio };
-    else if (ratio >= 1.8) level = { label: '初级', class: 'intermediate', ratio };
+    if (ratio >= 2.6) level = { label: '精英', class: 'elite', ratio };
+    else if (ratio >= 2.0) level = { label: '中级', class: 'advanced', ratio };
+    else if (ratio >= 1.5) level = { label: '初级', class: 'intermediate', ratio };
     else if (ratio >= 1.0) level = { label: '新手', class: 'novice', ratio };
   }
   return level;

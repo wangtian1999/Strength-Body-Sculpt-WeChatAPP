@@ -1,5 +1,7 @@
 .profile-card-ios {
-  padding: 16px;
+  padding: 24px 20px;
+  background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+  position: relative;
 }
 
 .profile-header-ios {
@@ -8,39 +10,109 @@
 }
 
 .avatar-placeholder-ios {
-  width: 60px;
-  height: 60px;
-  background: var(--ios-light-gray);
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  font-weight: 700;
-  margin-right: 16px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  margin-right: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .profile-info-ios {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .profile-name-row-ios {
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
+  justify-content: space-between;
+  margin-bottom: 6px;
 }
 
 .profile-name-ios {
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 700;
   color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.profile-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
 }
 
 .profile-status-ios {
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--ios-text-gray);
-  margin-top: 4px;
+}
+
+.status-highlight {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* 当前等级高亮样式 */
+.current-level {
+  background: rgba(255, 255, 255, 0.08) !important;
+  position: relative;
+}
+
+.current-level::after {
+  content: 'YOU';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--ios-blue);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.level-indicator {
+  width: 4px;
+  height: 16px;
+  border-radius: 2px;
+  margin-right: 12px;
+}
+
+.link-apple-btn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ios-blue);
+  background: rgba(0, 122, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.link-apple-btn:active {
+  background: rgba(0, 122, 255, 0.2);
+  transform: scale(0.95);
+}
+
+.ios-tip-mini {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  opacity: 0.6;
+  margin-top: 6px;
 }
 
 .sbd-card-ios {
@@ -271,7 +343,8 @@
   font-size: 20px;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
 }
 
 .modal-tip {
@@ -289,8 +362,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 0.5px solid var(--ios-light-gray);
+  padding: 14px 0;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.05);
 }
 
 .manual-input-item:last-child {
@@ -298,39 +371,21 @@
 }
 
 .manual-input-item text {
-  font-size: 15px;
+  font-size: 16px;
+  color: #fff;
 }
 
 .manual-input-item input {
   text-align: right;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--ios-blue);
-  width: 100px;
+  width: 120px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 0;
 }
 
-.modal-btns {
-  display: flex;
-  gap: 12px;
-}
-
-.modal-btn-cancel {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.1);
-  text-align: center;
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 15px;
-}
-
-.modal-btn-confirm {
-  flex: 1;
-  background: var(--ios-blue);
-  color: #fff;
-  text-align: center;
-  padding: 12px 4px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  white-space: nowrap;
-}
+/* 按钮样式已移至 app.wxss */

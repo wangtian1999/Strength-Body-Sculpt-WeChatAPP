@@ -20,7 +20,7 @@
         <text>已完成 {{currentWeek - 1}} / 12 周</text>
         <view class="ios-tip">建议：每周训练 3 次，练一休一，给肌肉恢复时间</view>
       </view>
-      <text class="strength-badge-ios">{{strengthLevel.label}}</text>
+      <text class="strength-badge-ios bg-lv-{{strengthLevel.class}}">{{strengthLevel.label}}</text>
     </view>
   </view>
 

@@ -228,6 +228,77 @@ input {
   border-radius: 12px;
 }
 
+/* 力量等级全局颜色体系 - Apple Design Style */
+.lv-untrained { color: #8e8e93 !important; } /* Gray */
+.lv-novice { color: #34c759 !important; }    /* Green */
+.lv-intermediate { color: #007aff !important; } /* Blue */
+.lv-advanced { color: #af52de !important; }    /* Purple */
+.lv-elite { 
+  background: linear-gradient(135deg, #ff9500 0%, #ffcc00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800 !important;
+  text-shadow: 0 0 10px rgba(255, 149, 0, 0.2);
+}
+
+/* 背景版力量等级 - 更加通透的 Apple 风格 */
+.bg-lv-untrained { background: rgba(142, 142, 147, 0.12); color: #8e8e93; }
+.bg-lv-novice { background: rgba(52, 199, 89, 0.12); color: #34c759; }
+.bg-lv-intermediate { background: rgba(0, 122, 255, 0.12); color: #007aff; }
+.bg-lv-advanced { background: rgba(175, 82, 222, 0.12); color: #af52de; }
+.bg-lv-elite { 
+  background: linear-gradient(135deg, rgba(255, 149, 0, 0.15) 0%, rgba(255, 204, 0, 0.15) 100%);
+  color: #ff9500;
+  border: 0.5px solid rgba(255, 149, 0, 0.2);
+}
+
+/* 等级徽章通用样式 */
+.lv-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* 全局 Modal 按钮样式 */
+.modal-btns {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.modal-btn-cancel {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  text-align: center;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.modal-btn-confirm {
+  flex: 1;
+  background: var(--ios-blue);
+  color: #fff;
+  text-align: center;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.modal-btn-cancel:active, .modal-btn-confirm:active {
+  opacity: 0.7;
+  transform: scale(0.98);
+}
+
 /* iOS 单选组样式 */
 .ios-radio-group {
   display: flex;
