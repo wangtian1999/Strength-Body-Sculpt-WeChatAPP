@@ -118,29 +118,32 @@
   </view>
 
   <!-- 力量部分 -->
-  <view class="section-header">力量推算与起步修正 SBD</view>
+  <view class="section-header">力量基准与 5x5 起步修正</view>
   <view class="ios-group">
-    <view class="sbd-estimate-row">
+    <view class="sbd-estimate-row haptic-active" bindtap="showManualSBDModal">
       <view class="sbd-estimate-item">
-        <text class="lab">系统推算</text>
+        <text class="lab">{{isManualSBD ? '实测力量 (1RM)' : '系统估算 (1RM)'}} ✍️</text>
         <text class="val">{{estimatedSBD.squat}} / {{estimatedSBD.bench}} / {{estimatedSBD.deadlift}} <text class="unit">kg</text></text>
-        <view class="ios-tip">基于您的 BMI 与训练基础推算的保守起步重量</view>
+        <view class="ios-tip">{{isManualSBD ? '基于您的实测数据判定' : '基于身材数据推算，点击可手动填入实测值'}}</view>
       </view>
-      <view class="level-badge-ios {{strengthLevel.class}}">{{strengthLevel.label}}</view>
+    </view>
+
+    <view class="ios-tip-box">
+      💡 5x5 起步重量建议填入您能**轻松完成 5 组 5 次**的重量（通常为 1RM 的 60%-70%）。如果您不确定，请保持默认值。
     </view>
 
     <view class="ios-item-vertical">
       <view class="label-row">
-        <text class="label">深蹲起步修正: {{startRange.squatMin}}kg</text>
+        <text class="label">深蹲 5x5 起步: {{startRange.squatMin}}kg</text>
       </view>
       <slider class="ios-slider" min="20" max="200" step="2.5" value="{{startRange.squatMin}}" bindchange="onWeightAdj" data-key="squatMin" activeColor="#fff" />
     </view>
     <view class="ios-item-vertical">
-      <text class="label">卧推起步: {{startRange.benchMin}}kg</text>
+      <text class="label">卧推 5x5 起步: {{startRange.benchMin}}kg</text>
       <slider class="ios-slider" min="20" max="150" step="2.5" value="{{startRange.benchMin}}" bindchange="onWeightAdj" data-key="benchMin" activeColor="#fff" />
     </view>
     <view class="ios-item-vertical">
-      <text class="label">硬拉起步: {{startRange.deadliftMin}}kg</text>
+      <text class="label">硬拉 5x5 起步: {{startRange.deadliftMin}}kg</text>
       <slider class="ios-slider" min="20" max="250" step="2.5" value="{{startRange.deadliftMin}}" bindchange="onWeightAdj" data-key="deadliftMin" activeColor="#fff" />
     </view>
   </view>
@@ -164,35 +167,51 @@
     <view class="modal-content help-content-ios" catchtap="stopBubble">
       <scroll-view scroll-y="true" class="help-scroll-ios">
         <view class="help-section">
-          <view class="help-title">Who · 它是为谁设计的</view>
-          <view class="help-text">专门为 0-2 年健身经验的小白设计。如果你不知道进健身房该练什么、该用多重的哑铃、或者不知道怎么练才能看到身材变化，这个工具就是为你准备的。</view>
+          <view class="help-title">Who · 适用人群</view>
+          <view class="help-text">0-2 年健身经验，不知道进健身房练什么、怎么练的小白。</view>
         </view>
         <view class="help-section">
-          <view class="help-title">What · 这个 App 是干什么的</view>
-          <view class="help-text">它是一个“数字健身教练”。它不需要你手动记录复杂的动作和组数，而是通过一套智能算法，根据你的身材告诉你：\n1. 你现在的力量大概是什么水平；\n2. 你该从多重的重量开始练；\n3. 接下来 12 周，每周该怎么加重。它帮你规划好了一切，你只需要按计划执行即可。</view>
+          <view class="help-title">What · 产品定位</view>
+          <view class="help-text">你的数字健身教练。基于身材数据，智能规划起步重量及 12 周计划。</view>
         </view>
         <view class="help-section">
-          <view class="help-title">How · 如何快速上手</view>
-          <view class="help-text">第一步：输入身材数据，让 App 认识你；\n第二步：定下目标（想变壮还是变瘦）；\n第三步：微调起步重量（如果不确定，就选最轻的）；\n第四步：在“训练计划”里按周执行。建议“练一天休一天”，每周练 3 次即可，休息和训练同样重要。</view>
+          <view class="help-title">How · 快速上手</view>
+          <view class="help-text">1. 录入数据；\n2. 设定目标；\n3. 确认起步重量；\n4. 开启 12 周计划（建议每周练 3 次，练一休一）。</view>
         </view>
         <view class="help-section">
-          <view class="help-title">Why · 为什么练这几个动作</view>
-          <view class="help-text">力量驱动身材：肌肉不是凭空长出来的，当你的力量变强了，身材自然会变好。深蹲、卧推、硬拉是健身界的“黄金动作”，它们能一次性练到全身最多的肌肉，效率最高。</view>
-        </view>
-        <view class="help-section">
-          <view class="help-title">TDEE · 你的热量账本</view>
-          <view class="help-text">就像你的银行余额。TDEE 是你每天维持体重不增不减所需的总热量。想增肌就多吃点（存钱），想减脂就少吃点（花钱）。</view>
-        </view>
-        <view class="help-section">
-          <view class="help-title">Energy Score · 状态打分</view>
-          <view class="help-text">这是你的“身体电量”。如果昨晚没睡好或压力大，电量低（1-2分），App 会自动帮你减重，防止受伤；如果电量满格，就可以大胆尝试进步。</view>
-        </view>
-        <view class="help-section">
-          <view class="help-title">Body Recomp · 瘦胖子逆袭</view>
-          <view class="help-text">如果你看起来不胖但肚子有肉（BMI 正常但体脂高），不需要激进减脂。通过“身体重组”——保持正常饮食 + 努力练力量，就能实现脂肪变少、肌肉变多的同步进化。</view>
+          <view class="help-title">Why · 核心原理</view>
+          <view class="help-text">力量驱动身材。深蹲、卧推、硬拉是全身效率最高的动作，力量变强，肌肉自然增长。</view>
         </view>
       </scroll-view>
       <view class="modal-close" bindtap="hideHelp">了解并开始</view>
+    </view>
+  </view>
+
+  <!-- 力量实测输入 Modal -->
+  <view class="ios-modal" wx:if="{{showManualSBD}}" bindtap="hideManualSBDModal">
+    <view class="modal-content manual-sbd-modal" catchtap="stopBubble">
+      <view class="modal-title">填入您的实测 1RM</view>
+      <view class="modal-tip">1RM 指您拼尽全力只能完成 1 次的最大重量</view>
+      
+      <view class="manual-input-group">
+        <view class="manual-input-item">
+          <text>深蹲 1RM (kg)</text>
+          <input type="digit" value="{{manualSBD.squat}}" bindinput="onManualSBDInput" data-key="squat" placeholder="{{estimatedSBD.squat}}" />
+        </view>
+        <view class="manual-input-item">
+          <text>卧推 1RM (kg)</text>
+          <input type="digit" value="{{manualSBD.bench}}" bindinput="onManualSBDInput" data-key="bench" placeholder="{{estimatedSBD.bench}}" />
+        </view>
+        <view class="manual-input-item">
+          <text>硬拉 1RM (kg)</text>
+          <input type="digit" value="{{manualSBD.deadlift}}" bindinput="onManualSBDInput" data-key="deadlift" placeholder="{{estimatedSBD.deadlift}}" />
+        </view>
+      </view>
+
+      <view class="modal-btns">
+        <view class="modal-btn-cancel" bindtap="resetManualSBD">恢复系统估算</view>
+        <view class="modal-btn-confirm" bindtap="confirmManualSBD">确认并保存</view>
+      </view>
     </view>
   </view>
 </view>

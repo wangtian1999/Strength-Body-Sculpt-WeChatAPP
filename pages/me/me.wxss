@@ -25,9 +25,16 @@
   flex-direction: column;
 }
 
+.profile-name-row-ios {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
 .profile-name-ios {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
 }
 
 .profile-status-ios {
@@ -68,10 +75,262 @@
   opacity: 0.3;
 }
 
+/* 力量表现合并卡片样式 */
+.strength-combined-card {
+  padding: 20px 16px;
+}
+
+.strength-grid-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.grid-label {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  text-align: center;
+}
+
+.strength-grid-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 10px 0;
+  align-items: center;
+}
+
+.grid-subject {
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.grid-value {
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* 统一修改 Modal 样式优化 */
+.strength-edit-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.section-sub-title {
+  font-size: 13px;
+  color: var(--ios-text-gray);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.row-inputs {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.manual-input-item.mini {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: none;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.manual-input-item.mini text {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  margin-bottom: 4px;
+}
+
+.manual-input-item.mini input {
+  text-align: center;
+  width: 100%;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ios-blue);
+}
+
 /* 移除冗余的 Modal 样式，已移至 app.wxss */
 .ios-footer-tip {
   text-align: center;
   font-size: 12px;
   color: var(--ios-text-gray);
   margin: 40px 0;
+}
+
+/* 营养建议卡片样式 (同步自 target.wxss) */
+.nutrition-card-ios {
+  padding: 24px;
+}
+
+.calories-header-ios {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.cal-val {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.cal-unit {
+  font-size: 13px;
+  color: var(--ios-text-gray);
+  margin-left: 4px;
+}
+
+.macro-grid-ios {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.macro-item-ios {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-bottom: 8px;
+}
+
+.dot.protein { background: #fff; }
+.dot.carb { background: var(--ios-green); }
+.dot.fat { background: #ff9500; }
+
+.m-lab {
+  font-size: 11px;
+  color: var(--ios-text-gray);
+  margin-bottom: 4px;
+}
+
+.m-val {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 力量评判标准表格样式 */
+.level-table-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ios-text-gray);
+  margin-bottom: 10px;
+  padding-left: 4px;
+}
+
+.level-table {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.level-row-ios {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.level-row-ios:last-child {
+  border-bottom: none;
+}
+
+.lv-lab {
+  font-size: 15px;
+  color: #fff;
+}
+
+.lv-val {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ios-text-gray);
+}
+
+/* 力量手动输入弹窗样式 (复用) */
+.manual-sbd-modal {
+  padding: 24px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.modal-tip {
+  font-size: 13px;
+  color: var(--ios-text-gray);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.manual-input-group {
+  margin-bottom: 24px;
+}
+
+.manual-input-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 0.5px solid var(--ios-light-gray);
+}
+
+.manual-input-item:last-child {
+  border-bottom: none;
+}
+
+.manual-input-item text {
+  font-size: 15px;
+}
+
+.manual-input-item input {
+  text-align: right;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-blue);
+  width: 100px;
+}
+
+.modal-btns {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-btn-cancel {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  text-align: center;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.modal-btn-confirm {
+  flex: 1;
+  background: var(--ios-blue);
+  color: #fff;
+  text-align: center;
+  padding: 12px 4px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
 }

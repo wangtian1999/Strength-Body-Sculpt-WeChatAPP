@@ -1,82 +1,37 @@
 <view class="container">
   <view class="large-title">规划您的目标</view>
 
-  <!-- 目标方向 Segmented Control -->
-  <view class="section-header">期望方向</view>
-  <view class="segmented-control">
-    <view class="segmented-item {{goal === 'muscle' ? 'active' : ''}}" bindtap="selectGoal" data-goal="muscle">增肌塑形</view>
-    <view class="segmented-item {{goal === 'fat_loss' ? 'active' : ''}}" bindtap="selectGoal" data-goal="fat_loss">减脂瘦身</view>
-  </view>
-
   <!-- 训练环境 Segmented Control -->
   <view class="section-header">训练环境</view>
   <view class="segmented-control">
-    <view class="segmented-item {{trainingMode === 'gym_strength' ? 'active' : ''}}" bindtap="selectMode" data-mode="gym_strength">健身房</view>
-    <view class="segmented-item {{trainingMode === 'home_bodyweight' ? 'active' : ''}}" bindtap="selectMode" data-mode="home_bodyweight">居家/自重</view>
-    <view class="segmented-item {{trainingMode === 'cardio' ? 'active' : ''}}" bindtap="selectMode" data-mode="cardio">有氧/HIIT</view>
+    <view class="segmented-item {{trainingMode === 'gym_strength' ? 'active' : ''}}" bindtap="selectMode" data-mode="gym_strength">健身房 (三大项)</view>
+    <view class="segmented-item {{trainingMode === 'home_bodyweight' ? 'active' : ''}}" bindtap="selectMode" data-mode="home_bodyweight">居家 (自重)</view>
+  </view>
+
+  <!-- 训练分化 Segmented Control -->
+  <view class="section-header">训练分化方式</view>
+  <view class="segmented-control">
+    <view class="segmented-item {{splitMode === 'full_body' ? 'active' : ''}}" bindtap="selectSplit" data-split="full_body">全身 (A/B)</view>
+    <view class="segmented-item {{splitMode === 'two_split' ? 'active' : ''}}" bindtap="selectSplit" data-split="two_split">二分 (上/下)</view>
+    <view class="segmented-item {{splitMode === 'three_split' ? 'active' : ''}}" bindtap="selectSplit" data-split="three_split">三分 (推/拉/腿)</view>
   </view>
 
   <!-- 目标详情 -->
-  <view class="section-header">目标设定</view>
+  <view class="section-header">塑身目标 (体脂率)</view>
   <view class="ios-group">
     <view class="ios-item-vertical">
       <view class="label-row">
-        <text class="label">目标体脂率: {{targetBodyFat}}%</text>
+        <text class="label">理想体脂率: {{targetBodyFat}}%</text>
         <text class="link-apple" bindtap="toggleBFRef">参考图</text>
       </view>
-      <slider class="ios-slider" min="{{goal === 'muscle' ? 8 : 5}}" max="{{goal === 'muscle' ? 20 : 35}}" step="1" value="{{targetBodyFat}}" bindchange="onFatChange" activeColor="#fff" />
+      <slider class="ios-slider" min="8" max="25" step="1" value="{{targetBodyFat}}" bindchange="onFatChange" activeColor="#fff" />
       <view class="ios-tip">
-        {{goal === 'muscle' ? '增肌建议: 男 12-15% | 女 18-22%' : '减脂建议: 男 10-12% | 女 18-20%'}}
-      </view>
-    </view>
-    
-    <view class="ios-item">
-      <view class="item-left">
-        <text>预估目标体重</text>
-        <view class="ios-tip">基于体脂目标的科学计算</view>
-      </view>
-      <text class="ios-value-highlight">{{targetWeight}}kg</text>
-    </view>
-
-    <view class="ios-item">
-      <view class="item-left">
-        <text>预估达成周期</text>
-        <view class="ios-tip">建议每周减重 0.5-1kg 为宜</view>
-      </view>
-      <text class="ios-value-highlight">{{estimatedWeeks}}周</text>
+      注：健力（力量增长）无特定终点，而塑身则通过体脂率量化。建议：男 12-15% | 女 19-22%。
     </view>
   </view>
+</view>
 
-  <!-- 营养建议卡片 -->
-  <view class="section-header">营养配比建议</view>
-  <view class="ios-group nutrition-card-ios">
-    <view class="calories-header-ios">
-      <text class="cal-val">{{dailyCalories}}</text>
-      <text class="cal-unit">kcal / 日</text>
-    </view>
-    <view class="macro-grid-ios">
-      <view class="macro-item-ios">
-        <view class="dot protein"></view>
-        <text class="m-lab">蛋白质</text>
-        <text class="m-val">{{macros.protein}}g</text>
-        <text class="ios-tip">修复肌肉</text>
-      </view>
-      <view class="macro-item-ios">
-        <view class="dot carb"></view>
-        <text class="m-lab">碳水</text>
-        <text class="m-val">{{macros.carb}}g</text>
-        <text class="ios-tip">能量来源</text>
-      </view>
-      <view class="macro-item-ios">
-        <view class="dot fat"></view>
-        <text class="m-lab">脂肪</text>
-        <text class="m-val">{{macros.fat}}g</text>
-        <text class="ios-tip">激素平衡</text>
-      </view>
-    </view>
-  </view>
-
-  <view class="btn-apple haptic-active" bindtap="saveAndNext">一键生成训练计划</view>
+<view class="btn-apple haptic-active" bindtap="saveAndNext">一键生成训练计划</view>
 
   <!-- 参考图 Modal -->
   <view class="ios-modal" wx:if="{{showBFRef}}" bindtap="toggleBFRef">

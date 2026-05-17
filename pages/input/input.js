@@ -14,6 +14,9 @@ Page({
     lbm: 0,
     showBFRef: false, // 是否显示体脂参考图
     showHelpModal: false, // 是否显示使用说明
+    showManualSBD: false, // 是否显示手动力量输入
+    isManualSBD: false, // 是否处于手动力量模式
+    manualSBD: { squat: 0, bench: 0, deadlift: 0 },
     levels: ['新手 (0-6个月)', '初级 (6-12个月)', '中级 (1-2年)', '高级 (2年以上)'],
     levelIndex: 0,
 
@@ -58,7 +61,7 @@ Page({
     },
     // 5.0 力量推算数据 (合并至录入页)
     estimatedSBD: { squat: 0, bench: 0, deadlift: 0 },
-    strengthLevel: { label: '未入门', class: 'untrained' },
+    strengthLevel: { label: '未入门', class: 'untrained', ratio: '0.00' },
     startRange: {
       squatMin: 0, squatMax: 0,
       benchMin: 0, benchMax: 0,
@@ -77,7 +80,9 @@ Page({
     if (strengthData) {
       this.setData({
         levelIndex: strengthData.levelIndex || 0,
-        startRange: strengthData.startRange || this.data.startRange
+        startRange: strengthData.startRange || this.data.startRange,
+        isManualSBD: strengthData.isManualSBD || false,
+        manualSBD: strengthData.manualSBD || this.data.manualSBD
       });
     }
 
@@ -205,29 +210,83 @@ Page({
   },
 
   calculateStrength() {
-    const { gender, weight, bmi, age, levelIndex } = this.data;
-    // 映射 UI 等级到算法等级
-    const levelMap = ['beginner', 'beginner', 'intermediate', 'intermediate'];
+    const { gender, weight, bmi, age, levelIndex, isManualSBD, manualSBD } = this.data;
+    // 映射 UI 等级到算法矩阵的 Key
+    const levelMap = ['beginner', 'novice', 'intermediate', 'advanced'];
     const levelKey = levelMap[levelIndex] || 'beginner';
     
-    const sbd = util.estimateSBD(gender, weight, bmi, age, levelKey);
-    const total = sbd.squat + sbd.bench + sbd.deadlift;
+    let sbd;
+    if (isManualSBD) {
+      sbd = { ...manualSBD, isBMIRisk: false };
+    } else {
+      sbd = util.estimateSBD(gender, weight, bmi, age, levelKey);
+    }
+    
+    const total = Number(sbd.squat) + Number(sbd.bench) + Number(sbd.deadlift);
     const strengthLevel = util.getStrengthLevel(gender, weight, bmi, total);
     
-    // 起步重量建议 (5x5 训练重量通常为 1RM 的 60% - 70%)
+    // 起步重量建议百分比根据等级动态调整
+    // 新手需要更多空间，高级需要更高强度
+    const startRatios = [
+      { min: 0.50, max: 0.60 }, // 新手 (0-6个月)
+      { min: 0.60, max: 0.70 }, // 初级 (6-12个月)
+      { min: 0.70, max: 0.75 }, // 中级 (1-2年)
+      { min: 0.75, max: 0.80 }  // 高级 (2年以上)
+    ];
+    const ratio = startRatios[levelIndex] || startRatios[0];
+
     const startRange = {
-      squatMin: Math.round(sbd.squat * 0.6),
-      squatMax: Math.round(sbd.squat * 0.75),
-      benchMin: Math.round(sbd.bench * 0.6),
-      benchMax: Math.round(sbd.bench * 0.75),
-      deadliftMin: Math.round(sbd.deadlift * 0.6),
-      deadliftMax: Math.round(sbd.deadlift * 0.75)
+      squatMin: Math.round(sbd.squat * ratio.min),
+      squatMax: Math.round(sbd.squat * ratio.max),
+      benchMin: Math.round(sbd.bench * ratio.min),
+      benchMax: Math.round(sbd.bench * ratio.max),
+      deadliftMin: Math.round(sbd.deadlift * ratio.min),
+      deadliftMax: Math.round(sbd.deadlift * ratio.max)
     };
 
     this.setData({
       estimatedSBD: sbd,
       strengthLevel,
       startRange
+    });
+  },
+
+  showManualSBDModal() {
+    this.setData({ 
+      showManualSBD: true,
+      manualSBD: this.data.isManualSBD ? this.data.manualSBD : { ...this.data.estimatedSBD }
+    });
+  },
+
+  hideManualSBDModal() {
+    this.setData({ showManualSBD: false });
+  },
+
+  onManualSBDInput(e) {
+    const { key } = e.currentTarget.dataset;
+    const value = Number(e.detail.value);
+    const manualSBD = this.data.manualSBD;
+    manualSBD[key] = value;
+    this.setData({ manualSBD });
+  },
+
+  confirmManualSBD() {
+    wx.vibrateShort({ type: 'medium' });
+    this.setData({ 
+      isManualSBD: true,
+      showManualSBD: false
+    }, () => {
+      this.calculateStrength();
+    });
+  },
+
+  resetManualSBD() {
+    wx.vibrateShort({ type: 'light' });
+    this.setData({ 
+      isManualSBD: false,
+      showManualSBD: false
+    }, () => {
+      this.calculateStrength();
     });
   },
 
@@ -250,7 +309,7 @@ Page({
     const { 
       gender, age, height, weight, bmi, bmr, tdee, bodyFat, lbm,
       isSimpleMode, selectedIndices, estimatedSBD, startRange, strengthLevel,
-      levelIndex
+      levelIndex, isManualSBD, manualSBD
     } = this.data;
     
     const bodyData = { 
@@ -258,7 +317,7 @@ Page({
       isSimpleMode, selectedIndices 
     };
     // 合并力量数据到本地存储
-    const strengthData = { estimatedSBD, startRange, strengthLevel, levelIndex };
+    const strengthData = { estimatedSBD, startRange, strengthLevel, levelIndex, isManualSBD, manualSBD };
     
     wx.setStorageSync('bodyData', bodyData);
     wx.setStorageSync('strengthData', strengthData);

@@ -1,122 +1,305 @@
 <view class="container">
-  <view class="large-title">我的</view>
+  <block wx:if="{{isLoaded}}">
+    <view class="large-title">我的</view>
 
-  <!-- 用户概览 Apple Health Style -->
-  <view class="ios-group profile-card-ios">
-    <view class="profile-header-ios">
-      <view class="avatar-placeholder-ios">{{bodyData.gender === 'male' ? 'M' : 'F'}}</view>
-      <view class="profile-info-ios">
-        <text class="profile-name-ios">{{bodyData.age}} 岁 · {{bodyData.height}}cm</text>
-        <view class="profile-status-row">
-          <text class="profile-status-ios">当前状态: {{strengthLevel.label}}</text>
-          <text class="ios-tip">基于 SBD 总重量的力量分级</text>
+    <!-- 用户概览 Apple Health Style -->
+    <view class="ios-group profile-card-ios haptic-active" bindtap="editProfile">
+      <view class="profile-header-ios">
+        <view class="avatar-placeholder-ios">{{bodyData.gender === 'male' ? 'M' : 'F'}}</view>
+        <view class="profile-info-ios">
+          <view class="profile-name-row-ios">
+            <text class="profile-name-ios">{{bodyData.age}} 岁 · {{bodyData.height}}cm</text>
+            <text class="link-apple" style="margin-left: 10px; font-size: 12px;">修改</text>
+          </view>
+          <view class="profile-status-row">
+            <text class="profile-status-ios">当前状态: {{strengthLevel.label}} ({{strengthLevel.ratio}}x)</text>
+            <text class="link-apple" style="margin-left: 10px;" catchtap="showStrengthLevelDetails">详情</text>
+          </view>
+          <text class="ios-tip">SBD总重量与体重的比率</text>
         </view>
       </view>
     </view>
-  </view>
 
-  <!-- 身体数据卡片 -->
-  <view class="section-header">身体数据 BODY DATA</view>
-  <view class="ios-group">
-    <view class="ios-item">
-      <text>体重</text>
-      <text class="ios-value-highlight">{{bodyData.weight}} kg</text>
-    </view>
-    <view class="ios-item">
-      <text>BMI</text>
-      <text class="ios-value-highlight">{{bodyData.bmi}}</text>
-    </view>
-    <view class="ios-item">
-      <text>体脂率</text>
-      <text class="ios-value-highlight">{{bodyData.bodyFat}}%</text>
-    </view>
-    <view class="ios-item">
-      <view class="item-left">
-        <text>TDEE</text>
-        <view class="ios-tip">每日总消耗热量</view>
+    <!-- 身体数据卡片 -->
+    <view class="section-header" wx:if="{{bodyData}}">身体数据 BODY DATA</view>
+    <view class="ios-group" wx:if="{{bodyData}}">
+      <view class="ios-item haptic-active" bindtap="editItem" data-type="weight">
+        <text>体重</text>
+        <text class="ios-value-highlight">{{bodyData.weight}} kg</text>
       </view>
-      <text class="ios-value-highlight">{{bodyData.tdee}} kcal</text>
-    </view>
-  </view>
-
-  <!-- 力量记录 -->
-  <view class="section-header">力量基准 INITIAL SBD</view>
-  <view class="ios-group sbd-card-ios">
-    <view class="sbd-row-ios">
-      <view class="sbd-col-ios">
-        <text class="sbd-lab-ios">深蹲</text>
-        <text class="sbd-val-ios">{{strengthData.startRange.squatMin}}kg</text>
+      <view class="ios-item">
+        <text>BMI</text>
+        <text class="ios-value-highlight">{{bodyData.bmi}}</text>
       </view>
-      <view class="sbd-col-ios">
-        <text class="sbd-lab-ios">卧推</text>
-        <text class="sbd-val-ios">{{strengthData.startRange.benchMin}}kg</text>
+      <view class="ios-item haptic-active" bindtap="editItem" data-type="bodyFat">
+        <text>体脂率</text>
+        <text class="ios-value-highlight">{{bodyData.bodyFat}}%</text>
       </view>
-      <view class="sbd-col-ios">
-        <text class="sbd-lab-ios">硬拉</text>
-        <text class="sbd-val-ios">{{strengthData.startRange.deadliftMin}}kg</text>
+      <view class="ios-item">
+        <view class="item-left">
+          <text>TDEE</text>
+          <view class="ios-tip">每日总消耗热量</view>
+        </view>
+        <text class="ios-value-highlight">{{bodyData.tdee}} kcal</text>
       </view>
     </view>
-    <view class="ios-tip-center">力量基准: 计划第 1 周的起步重量。通过每周线性增加 2.5-5kg 来实现“超负荷”，从而驱动肌肉增长。</view>
-  </view>
 
-  <!-- 系统设置 -->
-  <view class="section-header">账户与系统</view>
-  <view class="ios-group">
-    <view class="ios-item haptic-active" bindtap="showHelp">
-      <text>使用指南与原理</text>
-      <text class="ios-arrow">></text>
+    <!-- 力量表现 (合并 1RM 与 5x5) -->
+    <view class="section-header" wx:if="{{strengthData}}">力量表现 POWER PERFORMANCE</view>
+    <view class="ios-group strength-combined-card haptic-active" wx:if="{{strengthData}}" bindtap="editStrength">
+      <view class="strength-grid-header">
+        <text class="grid-label"></text>
+        <text class="grid-label">1RM MAX</text>
+        <text class="grid-label">5x5 起步</text>
+      </view>
+      <view class="strength-grid-row">
+        <text class="grid-subject">深蹲</text>
+        <text class="grid-value">{{strengthData.estimatedSBD.squat}}kg</text>
+        <text class="grid-value">{{strengthData.startRange.squatMin}}kg</text>
+      </view>
+      <view class="strength-grid-row">
+        <text class="grid-subject">卧推</text>
+        <text class="grid-value">{{strengthData.estimatedSBD.bench}}kg</text>
+        <text class="grid-value">{{strengthData.startRange.benchMin}}kg</text>
+      </view>
+      <view class="strength-grid-row">
+        <text class="grid-subject">硬拉</text>
+        <text class="grid-value">{{strengthData.estimatedSBD.deadlift}}kg</text>
+        <text class="grid-value">{{strengthData.startRange.deadliftMin}}kg</text>
+      </view>
+      <view class="ios-tip-center" style="margin-top: 12px;">
+        点击统一修改数据 <text class="link-apple" style="font-size: 12px; display: inline;">修改</text>
+      </view>
     </view>
-    <view class="ios-item haptic-active" bindtap="reOnboarding">
-      <text>重新录入数据</text>
-      <text class="ios-arrow">></text>
-    </view>
-    <view class="ios-item haptic-active" bindtap="reTargeting">
-      <text>修改训练目标</text>
-      <text class="ios-arrow">></text>
-    </view>
-    <view class="ios-item haptic-active" bindtap="resetSystem">
-      <text style="color: var(--ios-red)">彻底重置系统</text>
-    </view>
-  </view>
 
-  <view class="ios-footer-tip">
-    健力塑身 v1.0 · 数字健身，快速进化
-  </view>
-
-  <!-- 使用说明 Modal (通用) -->
-  <view class="ios-modal" wx:if="{{showHelpModal}}" bindtap="hideHelp">
-    <view class="modal-content help-content-ios" catchtap="stopBubble">
-      <scroll-view scroll-y="true" class="help-scroll-ios">
-        <view class="help-section">
-          <view class="help-title">Who · 它是为谁设计的</view>
-          <view class="help-text">专门为 0-2 年健身经验的小白设计。如果你不知道进健身房该练什么、该用多重的哑铃、或者不知道怎么练才能看到身材变化，这个工具就是为你准备的。</view>
+    <!-- 营养建议卡片 -->
+    <view class="section-header" wx:if="{{targetData}}">营养配比建议 NUTRITION</view>
+    <view class="ios-group nutrition-card-ios" wx:if="{{targetData}}">
+      <view class="calories-header-ios">
+        <text class="cal-val">{{targetData.dailyCalories}}</text>
+        <text class="cal-unit">kcal / 日</text>
+      </view>
+      <view class="macro-grid-ios">
+        <view class="macro-item-ios">
+          <view class="dot protein"></view>
+          <text class="m-lab">蛋白质</text>
+          <text class="m-val">{{targetData.macros.protein}}g</text>
+          <text class="ios-tip">修复肌肉</text>
         </view>
-        <view class="help-section">
-          <view class="help-title">What · 这个 App 是干什么的</view>
-          <view class="help-text">它是一个“数字健身教练”。它不需要你手动记录复杂的动作和组数，而是通过一套智能算法，根据你的身材告诉你：\n1. 你现在的力量大概是什么水平；\n2. 你该从多重的重量开始练；\n3. 接下来 12 周，每周该怎么加重。它帮你规划好了一切，你只需要按计划执行即可。</view>
+        <view class="macro-item-ios">
+          <view class="dot carb"></view>
+          <text class="m-lab">碳水</text>
+          <text class="m-val">{{targetData.macros.carb}}g</text>
+          <text class="ios-tip">能量来源</text>
         </view>
-        <view class="help-section">
-          <view class="help-title">How · 如何快速上手</view>
-          <view class="help-text">1. 录入身体数据；\n2. 设定目标（想变壮还是变瘦）；\n3. 微调起步重量；\n4. 开启 12 周计划并按周执行。建议“练一休一”，每周训练 3 次，肌肉是在休息时长的。</view>
+        <view class="macro-item-ios">
+          <view class="dot fat"></view>
+          <text class="m-lab">脂肪</text>
+          <text class="m-val">{{targetData.macros.fat}}g</text>
+          <text class="ios-tip">激素平衡</text>
         </view>
-        <view class="help-section">
-          <view class="help-title">Why · 为什么练这几个动作</view>
-          <view class="help-text">力量驱动身材：肌肉不是凭空长出来的，当你的力量变强了，身材自然会变好。深蹲、卧推、硬拉是健身界的“黄金动作”，效率最高。</view>
-        </view>
-        <view class="help-section">
-          <view class="help-title">TDEE · 你的热量账本</view>
-          <view class="help-text">就像你的银行余额。TDEE 是你每天维持体重不增不减所需的总热量。想增肌就多吃点（存钱），想减脂就少吃点（花钱）。</view>
-        </view>
-        <view class="help-section">
-          <view class="help-title">LBM · 瘦体重</view>
-          <view class="help-text">就是去掉全身脂肪后剩下的重量（骨头、肌肉、水分等）。肌肉越多，瘦体重就越高，基础代谢也越强，越不容易长胖。</view>
-        </view>
-        <view class="help-section">
-          <view class="help-title">LP · 步步为营法</view>
-          <view class="help-text">线性进阶（Linear Progression）。意思是每周在相同动作上增加一点点重量。这是新手期进步最快、最科学的方法。</view>
-        </view>
-      </scroll-view>
-      <view class="modal-close" bindtap="hideHelp">了解并开始</view>
+      </view>
+      <view class="ios-tip-center" style="margin-top: 20px;">
+        注：此为基于当前权重的每日营养基准，非具体食谱。建议根据训练强度与饱腹感微调。
+      </view>
     </view>
-  </view>
+
+    <!-- 系统设置 -->
+    <view class="section-header">账户与系统</view>
+    <view class="ios-group">
+      <view class="ios-item haptic-active" bindtap="showHelp">
+        <text>使用指南与原理</text>
+        <text class="ios-arrow">></text>
+      </view>
+      <view class="ios-item haptic-active" bindtap="reOnboarding">
+        <text>重新录入数据</text>
+        <text class="ios-arrow">></text>
+      </view>
+      <view class="ios-item haptic-active" bindtap="reTargeting">
+        <text>修改训练目标</text>
+        <text class="ios-arrow">></text>
+      </view>
+      <view class="ios-item haptic-active" bindtap="resetSystem">
+        <text style="color: var(--ios-red)">彻底重置系统</text>
+      </view>
+    </view>
+
+    <view class="ios-footer-tip">
+      健力塑身 v1.0 · 数字健身，快速进化
+    </view>
+
+    <!-- 使用说明 Modal -->
+    <view class="ios-modal" wx:if="{{showHelpModal}}" bindtap="hideHelp">
+      <view class="modal-content help-content-ios" catchtap="stopBubble">
+        <scroll-view scroll-y="true" class="help-scroll-ios">
+          <view class="help-section">
+            <view class="help-title">Who · 适用人群</view>
+            <view class="help-text">0-2 年健身经验，不知道进健身房练什么、怎么练的小白。</view>
+          </view>
+          <view class="help-section">
+            <view class="help-title">What · 产品定位</view>
+            <view class="help-text">你的数字健身教练。基于身材数据，智能规划起步重量及 12 周计划。</view>
+          </view>
+          <view class="help-section">
+            <view class="help-title">How · 快速上手</view>
+            <view class="help-text">
+              <text>1. 录入数据；\n</text>
+              <text>2. 设定目标；\n</text>
+              <text>3. 确认起步重量；\n</text>
+              <text>4. 开启 12 周计划（建议每周练 3 次，练一休一）。</text>
+            </view>
+          </view>
+          <view class="help-section">
+            <view class="help-title">Why · 核心原理</view>
+            <view class="help-text">力量驱动身材。深蹲、卧推、硬拉是全身效率最高的动作，力量变强，肌肉自然增长。</view>
+          </view>
+        </scroll-view>
+        <view class="modal-close" bindtap="hideHelp">了解并开始</view>
+      </view>
+    </view>
+
+    <!-- 力量评判标准 Modal -->
+    <view class="ios-modal" wx:if="{{showStrengthLevelModal}}" bindtap="hideStrengthLevelDetails">
+      <view class="modal-content help-content-ios" catchtap="stopBubble">
+        <view class="help-section">
+          <view class="help-title">力量评判标准 (Strength Ratio)</view>
+          <view class="help-text">比率 = (深蹲+卧推+硬拉) / 体重</view>
+          
+          <view class="level-table-header" style="margin-top: 20px;">男性标准 (Male)</view>
+          <view class="level-table">
+            <view class="level-row-ios">
+              <text class="lv-lab">未入门</text>
+              <text class="lv-val">&lt; 1.5x</text>
+            </view>
+            <view class="level-row-ios">
+              <text class="lv-lab">新手</text>
+              <text class="lv-val">1.5x - 2.5x</text>
+            </view>
+            <view class="level-row-ios">
+              <text class="lv-lab">初级</text>
+              <text class="lv-val">2.5x - 3.5x</text>
+            </view>
+            <view class="level-row-ios">
+              <text class="lv-lab">精英</text>
+              <text class="lv-val">&gt; 3.5x</text>
+            </view>
+          </view>
+
+          <view class="level-table-header" style="margin-top: 20px;">女性标准 (Female)</view>
+          <view class="level-table">
+            <view class="level-row-ios">
+              <text class="lv-lab">未入门</text>
+              <text class="lv-val">&lt; 1.0x</text>
+            </view>
+            <view class="level-row-ios">
+              <text class="lv-lab">新手</text>
+              <text class="lv-val">1.0x - 1.8x</text>
+            </view>
+            <view class="level-row-ios">
+              <text class="lv-lab">初级</text>
+              <text class="lv-val">1.8x - 2.5x</text>
+            </view>
+            <view class="level-row-ios">
+              <text class="lv-lab">精英</text>
+              <text class="lv-val">&gt; 2.5x</text>
+            </view>
+          </view>
+        </view>
+        <view class="modal-close" bindtap="hideStrengthLevelDetails">关闭</view>
+      </view>
+    </view>
+
+    <!-- 身体数据编辑 Modal -->
+    <view class="ios-modal" wx:if="{{showEditModal}}" bindtap="hideEditModal">
+      <view class="modal-content manual-sbd-modal" catchtap="stopBubble">
+        <view class="modal-title">修改{{editLabel}}</view>
+        <view class="manual-input-group">
+          <view class="manual-input-item">
+            <text>{{editLabel}} ({{editUnit}})</text>
+            <input type="digit" value="{{editValue}}" bindinput="onEditInput" focus="{{showEditModal}}" />
+          </view>
+        </view>
+        <view class="modal-btns">
+          <view class="modal-btn-cancel" bindtap="hideEditModal">取消</view>
+          <view class="modal-btn-confirm" bindtap="saveEdit">保存</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 力量数据统一修改 Modal -->
+    <view class="ios-modal" wx:if="{{showStrengthModal}}" bindtap="hideStrengthModal">
+      <view class="modal-content manual-sbd-modal" catchtap="stopBubble" style="max-width: 90%;">
+        <view class="modal-title">修改力量表现</view>
+        
+        <view class="strength-edit-section">
+          <view class="section-sub-title">1RM 极限力量 (kg)</view>
+          <view class="manual-input-group row-inputs">
+            <view class="manual-input-item mini">
+              <text>深蹲</text>
+              <input type="digit" value="{{tempSBD.squat}}" bindinput="onSBDInput" data-key="squat" />
+            </view>
+            <view class="manual-input-item mini">
+              <text>卧推</text>
+              <input type="digit" value="{{tempSBD.bench}}" bindinput="onSBDInput" data-key="bench" />
+            </view>
+            <view class="manual-input-item mini">
+              <text>硬拉</text>
+              <input type="digit" value="{{tempSBD.deadlift}}" bindinput="onSBDInput" data-key="deadlift" />
+            </view>
+          </view>
+        </view>
+
+        <view class="strength-edit-section" style="margin-top: 20px;">
+          <view class="section-sub-title">5x5 计划起步重量 (kg)</view>
+          <view class="manual-input-group row-inputs">
+            <view class="manual-input-item mini">
+              <text>深蹲</text>
+              <input type="digit" value="{{tempStartWeight.squat}}" bindinput="onStartWeightInput" data-key="squat" />
+            </view>
+            <view class="manual-input-item mini">
+              <text>卧推</text>
+              <input type="digit" value="{{tempStartWeight.bench}}" bindinput="onStartWeightInput" data-key="bench" />
+            </view>
+            <view class="manual-input-item mini">
+              <text>硬拉</text>
+              <input type="digit" value="{{tempStartWeight.deadlift}}" bindinput="onStartWeightInput" data-key="deadlift" />
+            </view>
+          </view>
+        </view>
+
+        <view class="modal-btns" style="margin-top: 25px;">
+          <view class="modal-btn-cancel" bindtap="hideStrengthModal">取消</view>
+          <view class="modal-btn-confirm" bindtap="saveStrength">全部保存</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 个人基本信息编辑 Modal -->
+    <view class="ios-modal" wx:if="{{showProfileModal}}" bindtap="hideProfileModal">
+      <view class="modal-content manual-sbd-modal" catchtap="stopBubble">
+        <view class="modal-title">修改基本资料</view>
+        <view class="manual-input-group">
+          <view class="manual-input-item">
+            <text>性别</text>
+            <view class="ios-radio-group">
+              <view class="ios-radio-label {{tempProfile.gender === 'male' ? 'active' : ''}}" bindtap="changeGender" data-value="male">男</view>
+              <view class="ios-radio-label {{tempProfile.gender === 'female' ? 'active' : ''}}" bindtap="changeGender" data-value="female">女</view>
+            </view>
+          </view>
+          <view class="manual-input-item">
+            <text>年龄 (岁)</text>
+            <input type="number" value="{{tempProfile.age}}" bindinput="onProfileInput" data-key="age" />
+          </view>
+          <view class="manual-input-item">
+            <text>身高 (cm)</text>
+            <input type="number" value="{{tempProfile.height}}" bindinput="onProfileInput" data-key="height" />
+          </view>
+        </view>
+        <view class="modal-btns">
+          <view class="modal-btn-cancel" bindtap="hideProfileModal">取消</view>
+          <view class="modal-btn-confirm" bindtap="saveProfile">保存全部</view>
+        </view>
+      </view>
+    </view>
+  </block>
 </view>

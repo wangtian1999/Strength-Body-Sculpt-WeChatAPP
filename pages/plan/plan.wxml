@@ -33,15 +33,29 @@
     </view>
   </view>
 
-  <!-- 能量评分 & 状态调整 -->
-  <view class="section-header">今日状态调整</view>
-  <view class="ios-group energy-card-ios">
-    <view class="label-row">
-      <text class="label">精力评分: {{energyScore}} 分</text>
-      <text class="energy-tip-ios">{{energyScore <= 2 ? '⚠️ 建议减载' : (energyScore >= 4 ? '🚀 状态爆表' : '⚖️ 状态正常')}}</text>
+  <!-- 今日热身与核心激活 (独立板块) -->
+  <view class="section-header">今日热身与核心激活</view>
+  <view class="ios-group plan-card-ios warmup-section-ios">
+    <view class="exercise-list-ios">
+      <view wx:for="{{warmupPlan}}" wx:key="id" class="exercise-item-ios">
+        <view class="ex-main-ios" bindtap="toggleWarmupDetail" data-index="{{index}}">
+          <view class="ex-check-ios {{completedTasks[item.id] ? 'checked' : ''}}" catchtap="toggleWarmupComplete" data-index="{{index}}">
+            <icon type="success_no_circle" size="12" color="#000" wx:if="{{completedTasks[item.id]}}" />
+          </view>
+          <view class="ex-info-ios">
+            <text class="ex-name-ios">{{item.name}}</text>
+            <text class="ex-params-ios">{{item.sets}}组 x {{item.reps}} / {{item.weight}}</text>
+          </view>
+          <view class="ex-timer-btn-ios" catchtap="startTimer" data-sec="{{item.restSec || 30}}">⏱ 计时</view>
+        </view>
+        <view class="ex-detail-ios" wx:if="{{item.showDetail}}">
+          <view class="detail-section-ios" wx:if="{{item.tip}}">
+            <text class="detail-label-ios">💡 动作要领</text>
+            <text class="detail-text-ios">{{item.tip}}</text>
+          </view>
+        </view>
+      </view>
     </view>
-    <slider class="ios-slider" min="1" max="5" step="1" value="{{energyScore}}" bindchange="onEnergyChange" activeColor="#fff" />
-    <view class="ios-tip">根据评分自动调整今日训练重量与组数</view>
   </view>
 
   <!-- 训练卡片 -->
@@ -78,39 +92,6 @@
           </view>
         </view>
       </view>
-    </view>
-  </view>
-
-  <!-- 饮食建议卡片 -->
-  <view class="section-header">今日饮食参考 (对应目标营养)</view>
-  <view class="ios-group food-card-ios">
-    <view class="food-exchange-grid">
-      <view class="food-type-col">
-        <text class="food-type-title">优质蛋白 (任选其一)</text>
-        <view wx:for="{{foodExchange.proteinFood}}" wx:key="name" class="food-item">
-          <text class="food-name">{{item.name}}</text>
-          <text class="food-amount">{{item.amount}}{{item.unit}}</text>
-          <text class="food-tip">{{item.tip}}</text>
-        </view>
-      </view>
-      <view class="food-type-col">
-        <text class="food-type-title">主食碳水 (任选其一)</text>
-        <view wx:for="{{foodExchange.carbFood}}" wx:key="name" class="food-item">
-          <text class="food-name">{{item.name}}</text>
-          <text class="food-amount">{{item.amount}}{{item.unit}}</text>
-        </view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 底部操作区 -->
-  <view class="ios-group action-group-ios">
-    <view class="ios-item-vertical" bindtap="toggleDeload">
-      <view class="label-row">
-        <text>{{isDeload ? '恢复正常强度' : '开启减载周'}}</text>
-        <switch checked="{{isDeload}}" disabled color="#34c759" />
-      </view>
-      <view class="ios-tip">减载周: 降低 50% 容量或 10% 重量，帮助中枢神经恢复，突破平台期。</view>
     </view>
   </view>
 

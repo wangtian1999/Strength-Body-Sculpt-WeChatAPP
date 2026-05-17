@@ -170,3 +170,85 @@
   color: var(--ios-text-gray);
   margin-left: 4px;
 }
+
+.ios-tip-box {
+  background: rgba(255, 159, 10, 0.1);
+  padding: 12px 16px;
+  margin: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #ff9f0a;
+  line-height: 1.5;
+}
+
+/* 力量手动输入弹窗样式 */
+.manual-sbd-modal {
+  padding: 24px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.modal-tip {
+  font-size: 13px;
+  color: var(--ios-text-gray);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.manual-input-group {
+  margin-bottom: 24px;
+}
+
+.manual-input-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 0.5px solid var(--ios-light-gray);
+}
+
+.manual-input-item:last-child {
+  border-bottom: none;
+}
+
+.manual-input-item text {
+  font-size: 15px;
+}
+
+.manual-input-item input {
+  text-align: right;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-blue);
+  width: 100px;
+}
+
+.modal-btns {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-btn-cancel {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  text-align: center;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.modal-btn-confirm {
+  flex: 1;
+  background: var(--ios-blue);
+  color: #fff;
+  text-align: center;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}

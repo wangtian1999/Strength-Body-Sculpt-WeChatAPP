@@ -7,20 +7,17 @@ Page({
     targetData: null,
     bodyData: null,
     weeklyPlan: [],
+    warmupPlan: [], // 新增：独立的热身板块
     completedTasks: {}, // { 'W1-DayA-Ex0': true }
-    foodExchange: null,
     swappedExercises: {}, // { 'W1-A-0': 'Leg Press' }
     growthPrediction: null,
-    deloadWeeks: {}, // { 'W6': true }
-    isDeload: false,
     globalProgress: 0,
     progressMatrix: [], // [{week: 1, status: 'done'}]
     timerActive: false,
     timerDisplay: '03:00',
     restTime: 0, // 休息计时
     timer: null,
-    energyScore: 3,
-    strengthLevel: { label: '未入门', class: 'untrained' },
+    strengthLevel: { label: '未入门', ratio: '0.00', class: 'untrained' },
     showBFRef: false
   },
 
@@ -34,14 +31,11 @@ Page({
     const bodyData = wx.getStorageSync('bodyData');
     const completedTasks = wx.getStorageSync('completedTasks') || {};
     const swappedExercises = wx.getStorageSync('swappedExercises') || {};
-    const deloadWeeks = wx.getStorageSync('deloadWeeks') || {};
     
     if (!strengthData || !targetData || !strengthData.startRange) {
       wx.reLaunch({ url: '/pages/input/input' });
       return;
     }
-
-    const isDeload = !!deloadWeeks[`W${this.data.currentWeek}`];
 
     this.setData({ 
       strengthData, 
@@ -49,8 +43,6 @@ Page({
       bodyData,
       completedTasks, 
       swappedExercises, 
-      deloadWeeks,
-      isDeload,
       strengthLevel: strengthData.strengthLevel || { label: '未入门', class: 'untrained' }
     }, () => {
       this.calculateProgress();
@@ -60,8 +52,7 @@ Page({
 
   selectWeek(e) {
     const week = e.currentTarget.dataset.week;
-    const isDeload = !!this.data.deloadWeeks[`W${week}`];
-    this.setData({ currentWeek: week, isDeload });
+    this.setData({ currentWeek: week });
     this.generatePlan(week);
   },
 
@@ -77,7 +68,14 @@ Page({
     for (let w = 1; w <= weeks; w++) {
       const wTasks = Object.keys(completedTasks).filter(k => k.startsWith(`W${w}-`));
       const wCompleted = wTasks.filter(k => completedTasks[k]).length;
-      const wTotal = 6; // 每周假设 2 天训练，每天 3 个动作
+      
+      const splitMode = targetData.splitMode || 'full_body';
+      let wMainTotal = 6; // 默认全身分化: 2天 * 3主项
+      if (splitMode === 'two_split') wMainTotal = 8; // 二分化: 2天 * 4主项
+      if (splitMode === 'three_split') wMainTotal = 9; // 三分化: 3天 * 3主项
+      
+      const wWarmupTotal = 4; // 每周独立热身板块有 4 个动作
+      const wTotal = wMainTotal + wWarmupTotal;
       
       totalExercises += wTotal;
       completedCount += wCompleted;
@@ -103,126 +101,233 @@ Page({
     
     if (currentPlanMode.includes('gym')) {
       plan = this.generateGymPlan(week, strengthData.startRange);
-    } else if (currentPlanMode.includes('home')) {
+    } else {
       plan = this.generateBodyweightPlan(week);
-    } else if (currentPlanMode.includes('cardio')) {
-      plan = this.generateCardioPlan(week);
     }
 
-    const foodExchange = util.getFoodExchange(targetData.macros, 'meat'); // 默认肉类，后续可从 me 页面读取偏好
+    // 生成独立的热身计划 (全分化通用)
+    const warmupPlan = [
+      { id: `W${week}-WU0`, name: '动态拉伸', sets: 1, reps: '5-10分', weight: '-', restSec: 0, ...util.getExerciseDetail('动态拉伸') },
+      { id: `W${week}-WU1`, name: '死虫式 (核心激活)', sets: 2, reps: '10-12次', weight: '-', restSec: 30, ...util.getExerciseDetail('死虫式') },
+      { id: `W${week}-WU2`, name: '鸟狗式 (核心激活)', sets: 2, reps: '10-12次', weight: '-', restSec: 30, ...util.getExerciseDetail('鸟狗式') },
+      { id: `W${week}-WU3`, name: '空杠/轻量练习', sets: 2, reps: '15次', weight: '轻量', restSec: 60, ...util.getExerciseDetail('空杠练习') }
+    ];
 
     this.setData({ 
       weeklyPlan: plan,
-      foodExchange
+      warmupPlan
     });
   },
 
   generateGymPlan(week, start) {
     if (!start) return [];
-    const { targetData, swappedExercises, deloadWeeks, bodyData, energyScore } = this.data;
-    const isMuscle = targetData.goal === 'muscle';
-    const isDeload = deloadWeeks[`W${week}`];
-    const recovery = util.getRecoveryAdjustment(energyScore);
+    const { targetData, swappedExercises, bodyData } = this.data;
+    const splitMode = targetData.splitMode || 'full_body';
+    const levelIndex = targetData.levelIndex || 0;
     
     const squatInc = util.getWeightIncrement(start.squatMin, bodyData.gender, bodyData.age, bodyData.bmi);
     const benchInc = util.getWeightIncrement(start.benchMin, bodyData.gender, bodyData.age, bodyData.bmi);
     const deadliftInc = util.getWeightIncrement(start.deadliftMin, bodyData.gender, bodyData.age, bodyData.bmi);
 
-    let multiplier = isMuscle ? 1 : 0.5;
-    if (isDeload) multiplier = 0; 
-    
-    if (bodyData.bmi > 28 && targetData.goal === 'fat_loss') {
-      multiplier *= 0.5;
-    }
-
     const baseWeights = {
-      squat: (start.squatMin + (week - 1) * squatInc * multiplier) * recovery.weightMult,
-      bench: (start.benchMin + (week - 1) * benchInc * multiplier) * recovery.weightMult,
-      deadlift: (start.deadliftMin + (week - 1) * deadliftInc * multiplier) * recovery.weightMult
+      squat: start.squatMin + (week - 1) * squatInc,
+      bench: start.benchMin + (week - 1) * benchInc,
+      deadlift: start.deadliftMin + (week - 1) * deadliftInc,
+      press: (start.benchMin + (week - 1) * benchInc) * 0.65 // 推举通常为卧推的 60-70%
     };
-
-    if (isDeload) {
-      Object.keys(baseWeights).forEach(k => baseWeights[k] *= 0.9);
-    }
-
-    const setsAdjust = (defaultSets) => Math.max(1, Math.round(defaultSets * recovery.setsMult));
 
     const getExData = (id, defaultName, baseWeight) => {
       const name = swappedExercises[id] || defaultName;
       const weightMultiplier = util.getWeightMultiplier(defaultName, name);
-      const finalWeight = (baseWeight * weightMultiplier).toFixed(1);
+      const finalWeight = baseWeight ? (baseWeight * weightMultiplier).toFixed(1) : '-';
       const detail = util.getExerciseDetail(name);
-      return { id, name, weight: finalWeight, ...detail };
+      
+      // 动态获取组数次数
+      const scheme = this.getSetRepScheme(levelIndex, name);
+      return { 
+        id, 
+        name, 
+        weight: finalWeight, 
+        ...detail,
+        ...(scheme || {}) // 如果是核心项则覆盖默认组次
+      };
     };
 
-    return [
-      {
-        day: isDeload ? `减载周 A 恢复训练` : (isMuscle ? '训练日 A 深蹲+卧推' : '力量维持 A 深蹲+卧推'),
-        exercises: [
-          { ...getExData(`W${week}-A-0`, '深蹲', baseWeights.squat), sets: setsAdjust(isDeload ? 3 : 5), reps: 5, restSec: 180 },
-          { ...getExData(`W${week}-A-1`, '卧推', baseWeights.bench), sets: setsAdjust(isDeload ? 3 : 5), reps: 5, restSec: 180 },
-          { id: `W${week}-A-2`, name: '辅助动作 划船/引体', sets: setsAdjust(3), reps: '8-12', weight: '-', restSec: 60, tip: '控制节奏，感受拉伸。' }
-        ]
-      },
-      {
-        day: isDeload ? `减载周 B 恢复训练` : (isMuscle ? '训练日 B 硬拉+推举' : '力量维持 B 硬拉+推举'),
-        exercises: [
-          { ...getExData(`W${week}-B-0`, '硬拉', baseWeights.deadlift), sets: 1, reps: 5, restSec: 240 },
-          { ...getExData(`W${week}-B-1`, '站姿推举', baseWeights.bench * 0.7), sets: setsAdjust(isDeload ? 3 : 5), reps: 5, restSec: 120 },
-          { id: `W${week}-B-2`, name: '辅助动作 核心/小肌群', sets: setsAdjust(3), reps: '10-15', weight: '-', restSec: 60, tip: '加强核心稳定性。' }
-        ]
-      }
-    ];
+    if (splitMode === 'two_split') {
+      return [
+        {
+          day: '训练日 A 上肢 (推+拉)',
+          exercises: [
+            { ...getExData(`W${week}-A-0`, '卧推', baseWeights.bench), sets: 4, reps: 6, restSec: 120 },
+            { ...getExData(`W${week}-A-1`, '站姿推举', baseWeights.press), sets: 4, reps: 8, restSec: 90 },
+            { ...getExData(`W${week}-A-2`, '划船'), sets: 3, reps: '8-12', weight: '-', restSec: 60 },
+            { ...getExData(`W${week}-A-3`, '引体/下拉'), sets: 3, reps: '8-12', weight: '-', restSec: 60 }
+          ]
+        },
+        {
+          day: '训练日 B 下肢 (蹲+拉)',
+          exercises: [
+            { ...getExData(`W${week}-B-0`, '深蹲', baseWeights.squat), sets: 4, reps: 6, restSec: 180 },
+            { ...getExData(`W${week}-B-1`, '硬拉', baseWeights.deadlift), sets: 1, reps: 5, restSec: 240 },
+            { ...getExData(`W${week}-B-2`, '腿举/腿屈伸'), sets: 3, reps: '10-15', weight: '-', restSec: 60 },
+            { ...getExData(`W${week}-B-3`, '核心/腹部'), sets: 3, reps: '15-20', weight: '-', restSec: 60 }
+          ]
+        }
+      ];
+    } else if (splitMode === 'three_split') {
+      return [
+        {
+          day: '训练日 A 推 (Push)',
+          exercises: [
+            { ...getExData(`W${week}-A-0`, '卧推', baseWeights.bench), sets: 5, reps: 5, restSec: 180 },
+            { ...getExData(`W${week}-A-1`, '站姿推举', baseWeights.press), sets: 3, reps: 8, restSec: 120 },
+            { ...getExData(`W${week}-A-2`, '双杠/臂屈伸'), sets: 3, reps: '10-12', weight: '-', restSec: 60 }
+          ]
+        },
+        {
+          day: '训练日 B 拉 (Pull)',
+          exercises: [
+            { ...getExData(`W${week}-B-0`, '硬拉', baseWeights.deadlift), sets: 1, reps: 5, restSec: 300 },
+            { ...getExData(`W${week}-B-1`, '杠铃划船'), sets: 4, reps: 8, weight: '-', restSec: 90 },
+            { ...getExData(`W${week}-B-2`, '引体向上'), sets: 3, reps: '力竭', weight: '-', restSec: 90 }
+          ]
+        },
+        {
+          day: '训练日 C 腿 (Legs)',
+          exercises: [
+            { ...getExData(`W${week}-C-0`, '深蹲', baseWeights.squat), sets: 5, reps: 5, restSec: 180 },
+            { ...getExData(`W${week}-C-1`, '腿举'), sets: 3, reps: '10-12', weight: '-', restSec: 90 },
+            { ...getExData(`W${week}-C-2`, '核心/提踵'), sets: 3, reps: '15-20', weight: '-', restSec: 60 }
+          ]
+        }
+      ];
+    } else {
+      // 默认全身分化 (Full Body A/B)
+      return [
+        {
+          day: '训练日 A 深蹲+卧推',
+          exercises: [
+            { ...getExData(`W${week}-A-0`, '深蹲', baseWeights.squat), sets: 5, reps: 5, restSec: 180 },
+            { ...getExData(`W${week}-A-1`, '卧推', baseWeights.bench), sets: 5, reps: 5, restSec: 180 },
+            { ...getExData(`W${week}-A-2`, '划船/引体'), sets: 3, reps: '8-12', weight: '-', restSec: 60 }
+          ]
+        },
+        {
+          day: '训练日 B 硬拉+推举',
+          exercises: [
+            { ...getExData(`W${week}-B-0`, '硬拉', baseWeights.deadlift), sets: 1, reps: 5, restSec: 240 },
+            { ...getExData(`W${week}-B-1`, '站姿推举', baseWeights.press), sets: 5, reps: 5, restSec: 120 },
+            { ...getExData(`W${week}-B-2`, '核心/小肌群'), sets: 3, reps: '10-15', weight: '-', restSec: 60 }
+          ]
+        }
+      ];
+    }
+  },
+
+  getSetRepScheme(levelIndex, exerciseName) {
+    // 核心项判定
+    const isCore = ['深蹲', '卧推', '硬拉', '推举'].some(name => exerciseName.includes(name));
+    if (!isCore) return null;
+
+    if (levelIndex <= 1) { // 新手/初级 (0-12个月)
+      if (exerciseName.includes('硬拉')) return { sets: 1, reps: 5 };
+      return { sets: 5, reps: 5 };
+    } else if (levelIndex === 2) { // 中级 (1-2年)
+      if (exerciseName.includes('硬拉')) return { sets: 1, reps: 3 };
+      return { sets: 3, reps: 5 };
+    } else { // 高级 (2年以上)
+      if (exerciseName.includes('硬拉')) return { sets: 2, reps: 2 };
+      return { sets: 5, reps: 3 };
+    }
   },
 
   generateBodyweightPlan(week) {
+    const { targetData } = this.data;
     const level = week <= 4 ? '入门' : (week <= 8 ? '进阶' : '挑战');
+    const splitMode = targetData.splitMode || 'full_body';
+    
+    // 动态次数逻辑
     const pushups = 10 + (week - 1) * 2;
     const squats = 15 + (week - 1) * 3;
-    
-    const getExData = (id, name, reps) => {
+    const lunges = 8 + Math.floor((week - 1) / 2) * 2;
+    const dips = 6 + Math.floor((week - 1) / 2) * 2;
+    const pikePushups = 5 + Math.floor((week - 1) / 2) * 1;
+    const plankTime = (45 + week * 5) + 's';
+
+    const getExData = (id, name, reps, sets = 3) => {
       const detail = util.getExerciseDetail(name);
-      return { id, name, reps, weight: '自重', ...detail };
+      return { id, name, reps, sets, weight: '自重', restSec: 60, ...detail };
     }
 
-    return [
-      {
-        day: `自重训练 A ${level}`,
-        exercises: [
-          { ...getExData(`W${week}-H-A0`, '俯卧撑', pushups), sets: 3, restSec: 90 },
-          { ...getExData(`W${week}-H-A1`, '自重深蹲', squats), sets: 3, restSec: 90 },
-          { id: `W${week}-H-A2`, ...getExData(`W${week}-H-A2`, '平板支撑', (45 + week * 5) + 's'), sets: 3, restSec: 60 }
-        ]
-      }
-    ];
-  },
-
-  generateCardioPlan(week) {
-    const { bodyData } = this.data;
-    const level = week <= 4 ? '基础耐力' : (week <= 8 ? '心肺进阶' : '燃脂爆发');
-    const baseDistance = bodyData.bmi > 28 ? 2.0 : 3.0;
-    const distance = (baseDistance + (week - 1) * 0.3).toFixed(1);
-
-    const getExData = (id, name, reps, weight) => {
-      const detail = util.getExerciseDetail(name);
-      return { id, name, reps, weight, ...detail };
+    if (splitMode === 'two_split') {
+      return [
+        {
+          day: `自重 A 上肢 (推+拉) ${level}`,
+          exercises: [
+            getExData(`W${week}-H-A0`, '俯卧撑', pushups, 4),
+            getExData(`W${week}-H-A1`, '板凳臂屈伸', dips, 3),
+            getExData(`W${week}-H-A2`, '划船/引体', '8-12', 3),
+            getExData(`W${week}-H-A3`, '平板支撑', plankTime, 3)
+          ]
+        },
+        {
+          day: `自重 B 下肢 (蹲+核心) ${level}`,
+          exercises: [
+            getExData(`W${week}-H-B0`, '自重深蹲', squats, 4),
+            getExData(`W${week}-H-B1`, '保加利亚蹲', lunges, 3),
+            getExData(`W${week}-H-B2`, '仰卧起坐/卷腹', 15 + week, 3),
+            getExData(`W${week}-H-B3`, '靠墙静蹲', '30-60s', 3)
+          ]
+        }
+      ];
+    } else if (splitMode === 'three_split') {
+      return [
+        {
+          day: `自重 A 推系列 (Push) ${level}`,
+          exercises: [
+            getExData(`W${week}-H-A0`, '俯卧撑', pushups, 4),
+            getExData(`W${week}-H-A1`, '折刀俯卧撑', pikePushups, 3),
+            getExData(`W${week}-H-A2`, '板凳臂屈伸', dips, 3)
+          ]
+        },
+        {
+          day: `自重 B 拉与核心 (Pull) ${level}`,
+          exercises: [
+            getExData(`W${week}-H-B0`, '划船/引体', '8-12', 4),
+            getExData(`W${week}-H-B1`, '仰卧起坐/卷腹', 20 + week, 3),
+            getExData(`W${week}-H-B2`, '平板支撑', plankTime, 3)
+          ]
+        },
+        {
+          day: `自重 C 下肢力量 (Legs) ${level}`,
+          exercises: [
+            getExData(`W${week}-H-C0`, '自重深蹲', squats, 4),
+            getExData(`W${week}-H-C1`, '保加利亚蹲', lunges, 3),
+            getExData(`W${week}-H-C2`, '靠墙静蹲', '45-90s', 3)
+          ]
+        }
+      ];
+    } else {
+      // 默认全身分化 (Full Body A/B)
+      return [
+        {
+          day: `自重 A (推+腿) ${level}`,
+          exercises: [
+            getExData(`W${week}-H-A0`, '俯卧撑', pushups, 3),
+            getExData(`W${week}-H-A1`, '自重深蹲', squats, 3),
+            getExData(`W${week}-H-A2`, '平板支撑', plankTime, 3)
+          ]
+        },
+        {
+          day: `自重 B (拉+核心) ${level}`,
+          exercises: [
+            getExData(`W${week}-H-B0`, '保加利亚蹲', lunges, 3),
+            getExData(`W${week}-H-B1`, '板凳臂屈伸', dips, 3),
+            getExData(`W${week}-H-B2`, '仰卧起坐/卷腹', 15 + week, 3)
+          ]
+        }
+      ];
     }
-
-    return [
-      {
-        day: `有氧 A ${level}`,
-        exercises: [
-          { ...getExData(`W${week}-C-A0`, '慢跑', distance + ' km', '持续'), sets: 1, restSec: 0 },
-          { ...getExData(`W${week}-C-A1`, '拉伸', '10 min', '-'), sets: 1, restSec: 0 }
-        ]
-      },
-      {
-        day: `有氧 B ${level}`,
-        exercises: [
-          { ...getExData(`W${week}-C-B0`, 'HIIT 间歇训练', '30s 冲刺 / 60s 慢走', '全力'), sets: week + 4, restSec: 60 }
-        ]
-      }
-    ];
   },
 
   startTimer(e) {
@@ -264,22 +369,26 @@ Page({
     this.setData({ restTime: 0, timer: null, timerActive: false });
   },
 
-  toggleDeload() {
-    wx.vibrateShort({ type: 'medium' });
-    const { currentWeek, deloadWeeks } = this.data;
-    const key = `W${currentWeek}`;
+  toggleWarmupComplete(e) {
+    wx.vibrateShort({ type: 'light' });
+    const { index } = e.currentTarget.dataset;
+    const warmupPlan = this.data.warmupPlan;
+    const exercise = warmupPlan[index];
     
-    const updatedDeloadWeeks = deloadWeeks || {};
-    updatedDeloadWeeks[key] = !updatedDeloadWeeks[key];
+    const taskId = exercise.id;
+    const completedTasks = this.data.completedTasks;
+    completedTasks[taskId] = !completedTasks[taskId];
     
-    this.setData({ 
-      deloadWeeks: updatedDeloadWeeks,
-      isDeload: updatedDeloadWeeks[key]
-    });
-    wx.setStorageSync('deloadWeeks', updatedDeloadWeeks);
-    this.generatePlan(currentWeek);
-    
-    wx.showToast({ title: updatedDeloadWeeks[key] ? '已开启减载模式' : '已恢复正常模式', icon: 'none' });
+    this.setData({ completedTasks });
+    wx.setStorageSync('completedTasks', completedTasks);
+    this.calculateProgress();
+  },
+
+  toggleWarmupDetail(e) {
+    const { index } = e.currentTarget.dataset;
+    const warmupPlan = this.data.warmupPlan;
+    warmupPlan[index].showDetail = !warmupPlan[index].showDetail;
+    this.setData({ warmupPlan });
   },
 
   toggleComplete(e) {
@@ -295,39 +404,6 @@ Page({
     this.setData({ completedTasks });
     wx.setStorageSync('completedTasks', completedTasks);
     this.calculateProgress();
-    
-    if (!completedTasks[taskId]) {
-      this.checkPlateau(taskId);
-    }
-  },
-
-  checkPlateau(taskId) {
-    const weekMatch = taskId.match(/W(\d+)/);
-    if (!weekMatch) return;
-    const week = parseInt(weekMatch[1]);
-    
-    if (week > 4 && !this.data.completedTasks[taskId]) {
-      const nextWeek = week + 1;
-      wx.showModal({
-        title: '平台期诊断',
-        content: '检测到动作未完成。建议下周执行 Deload（减载周），重量下调 10% 以恢复状态。是否一键开启？',
-        success: (res) => {
-          if (res.confirm) {
-            const deloadWeeks = this.data.deloadWeeks;
-            deloadWeeks[`W${nextWeek}`] = true;
-            this.setData({ deloadWeeks });
-            wx.setStorageSync('deloadWeeks', deloadWeeks);
-            wx.showToast({ title: '已开启下周减载' });
-          }
-        }
-      });
-    }
-  },
-
-  onEnergyChange(e) {
-    const energyScore = Number(e.detail.value);
-    this.setData({ energyScore });
-    this.generatePlan(this.data.currentWeek);
   },
 
   toggleExDetail(e) {

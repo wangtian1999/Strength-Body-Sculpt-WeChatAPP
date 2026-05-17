@@ -32,19 +32,15 @@ const calculateBMR = (gender, weight, height, age) => {
   }
 };
 
-// TDEE 计算 (根据 BMI 和 目标 自动调整活动系数)
-const calculateTDEE = (bmr, bmi, goal = 'maintenance') => {
+// TDEE 计算 (根据 BMI 自动调整活动系数)
+const calculateTDEE = (bmr, bmi) => {
   let activityLevel = 1.375; 
   if (bmi > 30) activityLevel = 1.2; 
   
   const baseTDEE = Math.round(bmr * activityLevel);
   
-  // 针对不同目标的偏置
-  if (goal === 'muscle') return baseTDEE + 250;
-  if (goal === 'fat_loss') return Math.max(1200, baseTDEE - 400);
-  if (goal === 'recomp') return baseTDEE; // 身体重组：维持热量 + 高蛋白
-  
-  return baseTDEE;
+  // 专注增肌塑形：默认提供热量盈余支持
+  return baseTDEE + 250;
 };
 
 // 力量推算算法 (基于身材和训练年限) - 4.0 升级：引入 BMI 风险对冲
@@ -52,15 +48,19 @@ const estimateSBD = (gender, weight, bmi, age = 25, level = 'beginner') => {
   // 严谨性：参数校验
   if (!weight || !bmi) return { squat: 0, bench: 0, deadlift: 0, isBMIRisk: false };
 
-  // 简易系数，仅作起步参考
+  // 力量系数矩阵：根据性别与训练阶段动态匹配
   const ratios = {
     male: {
-      beginner: { squat: 0.8, bench: 0.6, deadlift: 1.0 },
-      intermediate: { squat: 1.2, bench: 0.9, deadlift: 1.5 }
+      beginner: { squat: 0.8, bench: 0.6, deadlift: 1.0 },     // 新手 0-6月
+      novice: { squat: 1.0, bench: 0.75, deadlift: 1.25 },    // 初级 6-12月
+      intermediate: { squat: 1.2, bench: 0.9, deadlift: 1.5 }, // 中级 1-2年
+      advanced: { squat: 1.5, bench: 1.1, deadlift: 1.8 }     // 高级 2年以上
     },
     female: {
       beginner: { squat: 0.5, bench: 0.3, deadlift: 0.7 },
-      intermediate: { squat: 0.8, bench: 0.5, deadlift: 1.0 }
+      novice: { squat: 0.65, bench: 0.4, deadlift: 0.85 },
+      intermediate: { squat: 0.8, bench: 0.5, deadlift: 1.0 },
+      advanced: { squat: 1.0, bench: 0.65, deadlift: 1.3 }
     }
   };
   
@@ -95,18 +95,19 @@ const getStrengthLevel = (gender, weight, bmi, total) => {
     calculationWeight = 25 * (height * height);
   }
 
-  const ratio = total / calculationWeight;
+  const ratio = Number((total / calculationWeight).toFixed(2));
+  let level = { label: '未入门', class: 'untrained', ratio };
+  
   if (gender === 'male') {
-    if (ratio < 1.5) return { label: '未入门', class: 'untrained' };
-    if (ratio < 2.5) return { label: '新手', class: 'novice' };
-    if (ratio < 3.5) return { label: '初级', class: 'intermediate' };
-    return { label: '精英', class: 'elite' };
+    if (ratio >= 3.5) level = { label: '精英', class: 'elite', ratio };
+    else if (ratio >= 2.5) level = { label: '初级', class: 'intermediate', ratio };
+    else if (ratio >= 1.5) level = { label: '新手', class: 'novice', ratio };
   } else {
-    if (ratio < 1.0) return { label: '未入门', class: 'untrained' };
-    if (ratio < 1.8) return { label: '新手', class: 'novice' };
-    if (ratio < 2.5) return { label: '初级', class: 'intermediate' };
-    return { label: '精英', class: 'elite' };
+    if (ratio >= 2.5) level = { label: '精英', class: 'elite', ratio };
+    else if (ratio >= 1.8) level = { label: '初级', class: 'intermediate', ratio };
+    else if (ratio >= 1.0) level = { label: '新手', class: 'novice', ratio };
   }
+  return level;
 };
 
 // Wilks 分数计算 (极简近似版)
@@ -144,54 +145,6 @@ const getWeightIncrement = (currentWeight, gender, age = 25, bmi = 22) => {
   return baseInc;
 };
 
-// 5.0：恢复状态调整逻辑 (Energy Score 1-5) - 增强版
-const getRecoveryAdjustment = (score) => {
-  const map = {
-    1: { weightMult: 0.8, setsMult: 0.5, label: '极度疲劳：建议减载/休息' },
-    2: { weightMult: 0.9, setsMult: 0.7, label: '状态欠佳：适当降容' },
-    3: { weightMult: 1.0, setsMult: 1.0, label: '状态正常：按计划进行' },
-    4: { weightMult: 1.0, setsMult: 1.1, label: '状态良好：尝试增加容量' },
-    5: { weightMult: 1.05, setsMult: 1.2, label: '状态爆表：建议小幅冲击' }
-  };
-  return map[score] || map[3];
-};
-
-// 食物换算逻辑 (5.0 增加分类和廉价高效来源)
-const getFoodExchange = (macros, type = 'meat') => {
-  if (!macros) return null;
-  const { protein, carb } = macros;
-  
-  const proteinSources = {
-    meat: [
-      { name: '鸡胸肉', amount: Math.round(protein / 0.23), unit: 'g', tip: '高蛋白低脂肪' },
-      { name: '瘦牛肉', amount: Math.round(protein / 0.20), unit: 'g', tip: '含锌和铁' },
-      { name: '鱼肉/虾', amount: Math.round(protein / 0.18), unit: 'g', tip: '优质脂肪' }
-    ],
-    budget: [
-      { name: '鸡蛋', amount: Math.round(protein / 6), unit: '个', tip: '性价比之王' },
-      { name: '北豆腐', amount: Math.round(protein / 0.12), unit: 'g', tip: '优质植物蛋白' },
-      { name: '鸡肝', amount: Math.round(protein / 0.20), unit: 'g', tip: '极低成本来源' }
-    ],
-    dairy: [
-      { name: '希腊酸奶', amount: Math.round(protein / 0.1), unit: 'g', tip: '益生菌丰富' },
-      { name: '蛋白粉', amount: (protein / 24).toFixed(1), unit: '勺', tip: '吸收最快' }
-    ],
-    vege: [
-      { name: '北豆腐', amount: Math.round(protein / 0.12), unit: 'g', tip: '豆制品精华' },
-      { name: '大豆/豌豆', amount: Math.round(protein / 0.3), unit: 'g', tip: '复合碳水+蛋白' }
-    ]
-  };
-
-  return {
-    proteinFood: proteinSources[type] || proteinSources.meat,
-    carbFood: [
-      { name: '熟米饭', amount: Math.round(carb / 0.28), unit: 'g' },
-      { name: '燕麦/面条', amount: Math.round(carb / 0.6), unit: 'g' },
-      { name: '红薯/土豆', amount: Math.round(carb / 0.2), unit: 'g' }
-    ]
-  };
-};
-
 // 动作要领提示与退阶/进阶建议 (4.0 增强版)
 const getExerciseDetail = (name) => {
   const details = {
@@ -215,15 +168,85 @@ const getExerciseDetail = (name) => {
       regression: '坐姿哑铃推举',
       progression: '暂停推举'
     },
-    '辅助动作 划船/引体': {
+    '划船': {
+      tip: '拉向肚脐方向，挤压背部肌肉。',
+      regression: '单臂哑铃划船',
+      progression: '杠铃划船'
+    },
+    '引体/下拉': {
+      tip: '挺胸，肩胛下压，感受背阔肌发力。',
+      regression: '高位下拉',
+      progression: '负重引体'
+    },
+    '腿举/腿屈伸': {
+      tip: '控制离心下放，不要完全锁死膝盖。',
+      regression: '自重深蹲',
+      progression: '大重量腿举'
+    },
+    '核心/腹部': {
+      tip: '缓慢控制，感受腹肌卷缩。',
+      regression: '卷腹',
+      progression: '悬垂举腿'
+    },
+    '双杠/臂屈伸': {
+      tip: '身体正直，手肘紧贴。',
+      regression: '板凳臂屈伸',
+      progression: '负重双杠'
+    },
+    '杠铃划船': {
+      tip: '背部与地面平行，拉向小腹。',
+      regression: '哑铃划船',
+      progression: '潘德雷划船'
+    },
+    '引体向上': {
+      tip: '完全拉起，完全下放。',
+      regression: '弹力带引体',
+      progression: '负重引体'
+    },
+    '腿举': {
+      tip: '脚掌踩实踏板，缓慢下放。',
+      regression: '箭步蹲',
+      progression: '大重量腿举'
+    },
+    '核心/提踵': {
+      tip: '脚尖发力，顶峰停顿。',
+      regression: '平地提踵',
+      progression: '负重提踵'
+    },
+    '划船/引体': {
       tip: '肩胛收紧，感受背部肌肉拉伸。',
       regression: '高位下拉',
       progression: '负重引体向上'
     },
-    '辅助动作 核心/小肌群': {
+    '核心/小肌群': {
       tip: '动作平稳，不要借力，专注于目标肌肉。',
       regression: '器械动作',
       progression: '自由重量进阶'
+    },
+    '动态拉伸': {
+      tip: '活动关节，增加血流量。',
+      regression: '原地踏步',
+      progression: '大幅度摆动'
+    },
+    '猫式伸展': {
+      tip: '感受脊柱逐节活动，配合呼吸。',
+      regression: '小范围活动',
+      progression: '结合胸椎旋转'
+    },
+    '死虫式': {
+      tip: '下背部紧贴地面，保持腹压。',
+      regression: '单腿下放',
+      progression: '负重死虫式'
+    },
+    '鸟狗式': {
+      tip: '身体保持稳定不晃动，对侧肢体延伸。',
+      regression: '仅移动腿部',
+      progression: '结合膝肘触碰'
+    },
+    '空杠练习': {
+      tip: '专注于动作轨迹和肌肉发力感。',
+      regression: '木棍练习',
+      progression: '轻重量进阶'
     },
     '俯卧撑': {
       tip: '核心收紧如平板，身体呈直线。',
@@ -250,6 +273,31 @@ const getExerciseDetail = (name) => {
       regression: '动态活动',
       progression: '深度瑜伽'
     },
+    '保加利亚蹲': {
+      tip: '后脚垫高，前脚下蹲，感受臀腿拉伸。',
+      regression: '箭步蹲',
+      progression: '负重保加利亚蹲'
+    },
+    '板凳臂屈伸': {
+      tip: '双手支撑在板凳边缘，手肘向后。',
+      regression: '靠墙臂屈伸',
+      progression: '负重板凳臂屈伸'
+    },
+    '仰卧起坐/卷腹': {
+      tip: '腹肌发力卷起，不要拉脖子。',
+      regression: '半程卷腹',
+      progression: '悬垂举腿'
+    },
+    '折刀俯卧撑': {
+      tip: '臀部抬高，身体呈倒 V 型，头向手前方下落。',
+      regression: '高位俯卧撑',
+      progression: '倒立撑'
+    },
+    '靠墙静蹲': {
+      tip: '背部贴墙，大腿与地面平行，膝盖不超脚尖。',
+      regression: '高位静蹲',
+      progression: '单腿静蹲'
+    },
     'HIIT 间歇训练': {
       tip: '冲刺时全力以赴，间歇时深呼吸。',
       regression: '中强度有氧',
@@ -268,9 +316,7 @@ module.exports = {
   estimateSBD,
   getStrengthLevel,
   calculateWilks,
-  getFoodExchange,
   getWeightMultiplier,
   getWeightIncrement,
-  getRecoveryAdjustment,
   getExerciseDetail
 };
